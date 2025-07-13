@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f7f9fb;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23dcdcdc' stroke-width='0.6'%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%23ccc'/%3E%3Ccircle cx='90' cy='10' r='1.5' fill='%23ccc'/%3E%3Ccircle cx='50' cy='50' r='1.5' fill='%23ccc'/%3E%3Ccircle cx='10' cy='90' r='1.5' fill='%23ccc'/%3E%3Ccircle cx='90' cy='90' r='1.5' fill='%23ccc'/%3E%3Cline x1='10' y1='10' x2='50' y2='50'/%3E%3Cline x1='90' y1='10' x2='50' y2='50'/%3E%3Cline x1='10' y1='90' x2='50' y2='50'/%3E%3Cline x1='90' y1='90' x2='50' y2='50'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 200px 200px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        #form_screen {
+            margin-top: 40px;
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 10px;
+            display: block;
+        }
+
+        tbody,
+        tr,
+        td {
+            display: block;
+            width: 100%;
+        }
+
+        td {
+            vertical-align: middle;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 15px;
+            background-color: #f4f4f4;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background-color: #dcdcdc;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            padding: 10px;
+            font-size: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-right: 6px;
+        }
+
+        #goals_screen,
+        #hobbies_screen,
+        #resources_screen,
+        #strength_screen,
+        #aboutme_screen,
+        #weekness_screen,
+        #therty_screen {
+            width: 100%;
+            max-width: 700px;
+            margin: 50px auto;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        #calendar_screen,
+        #google_calendar_import_screen {
+            width: 100%;
+            max-width: 1600px;
+            margin: 30px auto;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background: #1e1e1e;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            padding: 24px;
+            color: #f5f5f5;
+        }
+
+        #calendarHeader {
+            text-align: center;
+            padding: 20px;
+            background: #1b1b1b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px 12px 0 0;
+            width: 100%;
+        }
+
+        #calendarHeader h1 {
+            margin: 0;
+            color: #fdd663;
+            font-weight: 800;
+            font-size: 2.5rem;
+        }
+
+        #calendarHeader p {
+            color: #aaa;
+            margin: 8px 0 0;
+        }
+
+        #calendarContainer {
+            width: 100%;
+        }
+
+        #dayHeaders {
+            display: grid;
+            grid-template-columns: 90px repeat(7, 1fr);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            padding-bottom: 5px;
+        }
+
+        .dayHeader {
+            text-align: center;
+            font-weight: 600;
+            color: #aaa;
+            padding: 10px;
+            font-size: 1.1rem;
+        }
+
+        .timeHeader {
+            text-align: center;
+            font-weight: 600;
+            color: #aaa;
+        }
+
+        #calendarGrid {
+            display: grid;
+            grid-template-columns: 90px repeat(7, 1fr);
+            grid-auto-rows: 80px;
+            position: relative;
+        }
+
+        .timeCell {
+            background: #181818;
+            color: #aaa;
+            border-right: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            align-items: start;
+            justify-content: center;
+            font-size: 1rem;
+            padding-top: 10px;
+        }
+
+        .dayCell {
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dayCell:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .hour-line {
+            position: absolute;
+            left: 90px;
+            width: calc(100% - 90px);
+            height: 1px;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .eventBox {
+            position: absolute;
+            border-radius: 6px;
+            padding: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+        }
+
+        .eventBox[data-type="school"] {
+            background: #3498db;
+        }
+
+        .eventBox[data-type="work"] {
+            background: #e67e22;
+        }
+
+        .eventBox[data-type="party"] {
+            background: #9b59b6;
+        }
+
+        .eventBox[data-type="other"] {
+            background: #2ecc71;
+        }
+
+        .eventBox[style*="opacity: 0.5"] {
+            border: 2px dashed #fffbe7;
+        }
+
+        .moveHandle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 14px;
+            width: 100%;
+            cursor: grab;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px 6px 0 0;
+        }
+
+        .resizeHandle {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: ns-resize;
+            border-radius: 0 0 6px 6px;
+        }
+
+        #modalOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        #modalOverlay.visible {
+            display: flex;
+        }
+
+        #eventModal {
+            background: #262626;
+            padding: 30px;
+            border-radius: 12px;
+            width: 420px;
+            max-width: 95vw;
+            color: #f5f5f5;
+        }
+
+        #eventModal h2 {
+            margin-top: 0;
+            color: #fdd663;
+            text-align: center;
+        }
+
+        #eventModal label {
+            margin-top: 10px;
+            display: block;
+            font-weight: 600;
+            color: #aaa;
+        }
+
+        #eventModal input,
+        #eventModal select,
+        #eventModal textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            background: #1c1c1c;
+            color: #f5f5f5;
+        }
+
+        #modalButtons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        #modalButtons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #saveBtn {
+            background: #2ecc71;
+        }
+
+        #deleteBtn {
+            background: #e74c3c;
+        }
+
+        #cancelBtn {
+            background: #555;
+        }
+
+        #saveBtn:hover {
+            background: #27ae60;
+        }
+
+        #deleteBtn:hover {
+            background: #c0392b;
+        }
+
+        #cancelBtn:hover {
+            background: #444;
+        }
+
+        #calendar_continueBtn,
+        #import_calendar_back_btn {
+            margin: 30px auto 20px auto;
+            display: block;
+            padding: 12px 32px;
+            font-size: 1.2em;
+            border-radius: 8px;
+            background: #2ecc71;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .textarea-input-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .textarea-input-container textarea {
+            width: 100%;
+            min-height: 90px;
+            font-size: 1.1em;
+            resize: vertical;
+            box-sizing: border-box;
+            padding-right: 50px;
+        }
+
+        .microphone-button {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.1s ease;
+            opacity: 0.7;
+            width: auto;
+            margin: 0;
+            font-size: 1.2em;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+        }
+
+        .microphone-button:hover {
+            opacity: 1;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .microphone-button:active {
+            transform: scale(0.98);
+        }
+
+        .microphone-button i {
+            margin-right: 5px;
+            transition: color 0.2s ease;
+        }
+
+        .microphone-button.listening i {
+            color: #e74c3c;
+        }
+
+        .listening-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: red;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        #eventCompletedInput {
+            transform: scale(1.3);
+            margin: 10px 0 20px 0;
+        }
+
+        /* Styles for Google Calendar Import Screen */
+        #google_calendar_import_screen .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            width: 100%;
+            border-radius: 12px 12px 0 0;
+        }
+
+        #google_calendar_import_screen .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        #google_calendar_import_screen .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        #google_calendar_import_screen .content {
+            padding: 30px;
+            width: 100%;
+        }
+
+        #google_calendar_import_screen .form-group {
+            margin-bottom: 20px;
+        }
+
+        #google_calendar_import_screen label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #aaa;
+            /* Adjusted for better blending */
+        }
+
+        #google_calendar_import_screen input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #555;
+            /* Adjusted for dark background */
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: #1c1c1c;
+            /* Adjusted for dark background */
+            color: #f5f5f5;
+            /* Adjusted for dark background */
+        }
+
+        #google_calendar_import_screen input[type="text"]:focus {
+            outline: none;
+            border-color: #00f2fe;
+            /* Adjusted for dark background */
+        }
+
+        #google_calendar_import_screen input[type="text"]::placeholder {
+            color: #888;
+            /* Adjusted for better blending */
+            opacity: 1;
+            /* Ensure placeholder is visible */
+        }
+
+        #google_calendar_import_screen button {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-right: 10px;
+            width: auto;
+            /* Override global button width */
+        }
+
+        #google_calendar_import_screen button:hover {
+            transform: translateY(-2px);
+        }
+
+        #google_calendar_import_screen button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #google_calendar_import_screen .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        #google_calendar_import_screen .alert.error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+        }
+
+        #google_calendar_import_screen .alert.success {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #3c3;
+        }
+
+        #google_calendar_import_screen .hidden {
+            display: none;
+        }
+
+        #google_calendar_import_screen .loading {
+            text-align: center;
+            padding: 20px;
+            color: #f5f5f5;
+        }
+    </style>
+</head>
+
+<body onload="main()">
+    <div id="form_screen">
+        <table>
+            <tbody>
+                <tr>
+                    <td>
+                        <label><input id="go_to_school" type="checkbox" onclick="school()">🏫 Go To school</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td><button onclick="display_text_box('sports_text_box','age_text_box');this.style.color='green'">🏀
+                            Sports</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="text" id="sports_text_box" placeholder="For results answer correctly"></td>
+                </tr>
+                <tr>
+                    <td><button onclick="display_text_box('age_text_box','sports_text_box');this.style.color='green'">🎂
+                            Age</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input type="number" id="age_text_box" placeholder="For results answer correctly"></td>
+                </tr>
+                <tr>
+                    <td><button onclick="goals_page();this.style.color='green'">🎯 Goals</button></td>
+                </tr>
+                <tr>
+                    <td><button onclick="hobbies_page();this.style.color='green'">🎨 Hobbies you like</button></td>
+                </tr>
+                <tr>
+                    <td><button id="flause_button" onclick="weaknesses_page();this.style.color='green'">💔 Your
+                            flaws/weaknesses</button></td>
+                </tr>
+                <tr>
+                    <td><button onclick="strengths_page();this.style.color='green'">💪 Strengths</button></td>
+                </tr>
+                <tr>
+                    <td><button onclick="resources_page();this.style.color='green'">📚 Your resources</button></td>
+                </tr>
+                <tr>
+                    <td><button onclick="aboutme_page();this.style.color='green'">👤 About me /more info</button></td>
+                </tr>
+                <tr>
+                    <td>
+                        <button onclick="calendar_page();this.style.color='green'">Your current
+                            schedule</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><button id="therty_day_page_id" onclick="therty_day_page();this.style.color='green'">📈 How do
+                            you want to grow in the next 30 days?</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><button style="background-color:rgb(112, 207, 112)" onclick="submit()">🚀 Submit</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="goals_screen">
+        <div class="textarea-input-container">
+            <textarea id="goals_text_box" placeholder="WRITE YOUR GOALS HERE"></textarea>
+            <button class="microphone-button" id="goals_mic_button"
+                onclick="toggle_speech_recognition('goals_text_box', 'goals_mic_button')">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+        <button class="screen-button" onclick="back()">⬅️ Continue</button>
+    </div>
+
+    <div id="hobbies_screen">
+        <div class="textarea-input-container">
+            <textarea id="hobbies_text_box" placeholder="WRITE THE Hobbies you like HERE"></textarea>
+            <button class="microphone-button" id="hobbies_mic_button"
+                onclick="toggle_speech_recognition('hobbies_text_box', 'hobbies_mic_button')">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+        <button class="screen-button" onclick="continue_from_hobbies()">⬅️ Continue</button>
+    </div>
+
+    <div id="resources_screen">
+        <table>
+            <tr>
+                <td> have an AI PC <input id="have_ai_pc" type="checkbox"></td>
+            </tr>
+            <tr>
+                <td> have an Arduino <input id="have_arduino" type="checkbox"></td>
+            </tr>
+            <tr>
+                <td> have a computer <input id="have_computer" type="checkbox"></td>
+            </tr>
+            <tr>
+                <td> have books <input id="have_books" type="checkbox"></td>
+            </tr>
+            <tr>
+                <td> have musical instrument <input id="have_instrument" type="checkbox"></td>
+            </tr>
+            <tr>
+                <td> have art supplies <input id="have_art_supplies" type="checkbox"></td>
+            </tr>
+            <tr>
+                <td> have sports equipment <input id="have_sports_equipment" type="checkbox"></td>
+            </tr>
+            <tr>
+                <td>
+                    other <input id="resources_text_box_checkmark" type="checkbox">
+                    <br>
+                    <input style="height: 2vh;width:30vw" id="resources_text_box" placeholder="other">
+                    <div id="other_resources_tags" style="margin-top:8px; min-height:24px;"></div>
+                </td>
+            </tr>
+        </table>
+        <button class="screen-button" onclick="continue_from_resources()">⬅️ Continue</button>
+    </div>
+
+    <div id="strength_screen">
+        <div class="textarea-input-container">
+            <textarea id="strength_text_box" placeholder="WRITE YOUR strengths HERE"></textarea>
+            <button class="microphone-button" id="strength_mic_button"
+                onclick="toggle_speech_recognition('strength_text_box', 'strength_mic_button')">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+        <button class="screen-button" onclick="continue_from_strength()">⬅️ Continue</button>
+    </div>
+
+    <div id="aboutme_screen">
+        <div class="textarea-input-container">
+            <textarea id="about_text_box" placeholder="WRITE about yourself here, Truthfully!!!!!!"></textarea>
+            <button class="microphone-button" id="about_mic_button"
+                onclick="toggle_speech_recognition('about_text_box', 'about_mic_button')">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+        <button class="screen-button" onclick="continue_from_about()">⬅️ Continue</button>
+    </div>
+
+    <div id="weekness_screen">
+        <div class="textarea-input-container">
+            <textarea id="weaknesses" placeholder="WRITE YOUR flaws HERE"></textarea>
+            <button class="microphone-button" id="weakness_mic_button"
+                onclick="toggle_speech_recognition('weaknesses', 'weakness_mic_button')">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+        <button class="screen-button" onclick="continue_from_weekness()">⬅️ Continue</button>
+    </div>
+
+    <div id="therty_screen">
+        <div class="textarea-input-container">
+            <textarea id="therty" placeholder="📈 How do you want to grow in the next 30 days?"></textarea>
+            <button class="microphone-button" id="therty_mic_button"
+                onclick="toggle_speech_recognition('therty', 'therty_mic_button')">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+        <button class="screen-button" id="continue_from_therty_id" onclick="continue_from_therty()">⬅️ Continue</button>
+    </div>
+
+    <!-- CALENDAR SCREEN -->
+    <div id="calendar_screen">
+        <div id="calendarHeader">
+            <h1>🔥 THE Ultimate Week Planner</h1>
+            <p>Click & drag to create, move or edit events like a boss 😎</p>
+            <button id="importGoogleCalendarBtn" onclick="showGoogleCalendarImport()">Import from Google
+                Calendar</button>
+        </div>
+        <div id="calendarContainer">
+            <div id="dayHeaders">
+                <div class="timeHeader">Time</div>
+                <div class="dayHeader">Monday</div>
+                <div class="dayHeader">Tuesday</div>
+                <div class="dayHeader">Wednesday</div>
+                <div class="dayHeader">Thursday</div>
+                <div class="dayHeader">Friday</div>
+                <div class="dayHeader">Saturday</div>
+                <div class="dayHeader">Sunday</div>
+            </div>
+            <div id="calendarGrid"></div>
+        </div>
+        <div id="modalOverlay">
+            <div id="eventModal">
+                <h2>Edit Event</h2>
+                <label>Title</label>
+                <input id="eventTitleInput" type="text" placeholder="Event Title">
+
+                <label>Type</label>
+                <select id="eventTypeSelect">
+                    <option value="school">School</option>
+                    <option value="work">Work</option>
+                    <option value="party">Party</option>
+                    <option value="other">Other</option>
+                </select>
+
+                <label>Start Time</label>
+                <input id="eventStartInput" type="time">
+
+                <label>Duration (minutes)</label>
+                <input id="eventDurationInput" type="number" min="15" max="1440" step="15" value="60">
+
+                <label>Notes</label>
+                <textarea id="eventNotesInput" rows="3"></textarea>
+
+                <div id="modalButtons">
+                    <button id="saveBtn">Save</button>
+                    <button id="deleteBtn">Delete</button>
+                    <button id="cancelBtn">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <button id="calendar_continueBtn">⬅️ Continue</button>
+    </div>
+
+    <!-- GOOGLE CALENDAR IMPORT SCREEN -->
+    <div id="google_calendar_import_screen">
+        <div class="header">
+            <h1>📅 Import Google Calendar Events</h1>
+            <p>Paste a public Google Calendar URL or ID to import events</p>
+        </div>
+
+        <div class="content">
+            <div class="form-group">
+                <label for="calendarUrl">Public Calendar URL or ID:</label>
+                <input type="text" id="calendarUrl"
+                    placeholder="https://calendar.google.com/calendar/embed?src=example@gmail.com or example@gmail.com">
+            </div>
+
+            <button onclick="importGoogleCalendarEvents()" id="importGoogleCalendarEventsBtn">Import Calendar</button>
+
+            <div id="importAlert" class="alert hidden"></div>
+            <div id="importLoading" class="loading hidden">Loading calendar events...</div>
+        </div>
+
+    </div>
+
+    <audio id="calendarReadySound" src="calendar_ready.mp3" preload="auto"></audio>
+
+    <script>
+        var my_login_info;
+
+        function main()
+        {
+            var check = sessionStorage.getItem('about_me');
+            if (check != null)
+            {
+                my_login_info = JSON.parse(check).my_login_info;
+            }
+
+            // Check for imported events in sessionStorage and load them
+            const imported = JSON.parse(sessionStorage.getItem('about_me') || '{}')?.calendar_imported_events;
+            if (Array.isArray(imported) && imported.length > 0)
+            {
+                const dayMap = {
+                    0: 6, // Sunday
+                    1: 0, // Monday
+                    2: 1,
+                    3: 2,
+                    4: 3,
+                    5: 4,
+                    6: 5
+                };
+
+                calendar_events = imported.map(evt =>
+                {
+                    const title = evt.title || 'Imported Event';
+                    const notes = evt.description || '';
+                    const date = evt.start?.dateTime || evt.start?.date;
+                    const end = evt.end?.dateTime || evt.end?.date;
+
+                    let dayIndex = 0;
+                    let startMinutes = 8 * 60;
+                    let durationMinutes = 60;
+
+                    if (date)
+                    {
+                        const startDate = new Date(date);
+                        const endDate = new Date(end);
+                        dayIndex = dayMap[startDate.getDay()] ?? 0;
+                        startMinutes = startDate.getHours() * 60 + startDate.getMinutes();
+                        durationMinutes = (endDate - startDate) / (1000 * 60);
+                        if (isNaN(durationMinutes) || durationMinutes <= 0) durationMinutes = 60; // Default to 1 hour if calculation fails
+                    }
+
+                    return {
+                        id: 'import-' + Math.random().toString(36).slice(2),
+                        title,
+                        type: 'other', // Default type, user can edit later
+                        start: startMinutes,
+                        duration: durationMinutes,
+                        notes,
+                        day: dayIndex
+                    };
+                });
+                // Clear imported events from session storage after loading to prevent re-import on subsequent loads
+                let aboutMeData = JSON.parse(sessionStorage.getItem('about_me') || '{}');
+                delete aboutMeData.calendar_imported_events;
+                sessionStorage.setItem('about_me', JSON.stringify(aboutMeData));
+            }
+        }
+
+        document.getElementById("therty_screen").style.display = 'none';
+        document.getElementById("aboutme_screen").style.display = 'none';
+        document.getElementById("weekness_screen").style.display = 'none';
+        document.getElementById("strength_screen").style.display = 'none';
+        document.getElementById("resources_screen").style.display = 'none';
+        document.getElementById("hobbies_screen").style.display = 'none';
+        document.getElementById("goals_screen").style.display = 'none';
+        document.getElementById("age_text_box").style.display = 'none';
+        document.getElementById("sports_text_box").style.display = "none";
+        document.getElementById("calendar_screen").style.display = "none";
+        document.getElementById("google_calendar_import_screen").style.display = "none";
+
+
+        var my_info = {
+            go_to_school: false,
+            goals: "",
+            therty_day: "",
+            hobbies: "",
+            age: -1,
+            resources: [],
+            strengths: "",
+            weaknesses: "",
+            sports: "",
+            situation: "",
+            commitmnets_to_yourself: "",
+            more_info: "",
+            priorities: "",
+            fixedSchedule: [],
+        };
+
+        // --- Calendar Data ---
+        let calendar_events = []; // This will be populated from sessionStorage on main() load
+
+        function display_text_box(box, box_to_remove)
+        {
+            document.getElementById(box).style.display = "block";
+            document.getElementById(box_to_remove).style.display = "none";
+            stop_all_recognition();
+        }
+
+        function weaknesses_page()
+        {
+            document.getElementById("form_screen").style.display = "none";
+            document.getElementById("weekness_screen").style.display = 'flex';
+            stop_all_recognition();
+        }
+
+        function therty_day_page()
+        {
+            document.getElementById("form_screen").style.display = "none";
+            document.getElementById("therty_screen").style.display = 'flex';
+            stop_all_recognition();
+        }
+
+        function continue_from_therty()
+        {
+            document.getElementById("therty_screen").style.display = 'none';
+            document.getElementById("form_screen").style.display = 'block';
+            stop_all_recognition();
+        }
+
+        function continue_from_weekness()
+        {
+            document.getElementById("weekness_screen").style.display = 'none';
+            document.getElementById("form_screen").style.display = 'block';
+            stop_all_recognition();
+        }
+
+        function continue_from_strength()
+        {
+            document.getElementById("strength_screen").style.display = 'none';
+            document.getElementById("form_screen").style.display = 'block';
+            stop_all_recognition();
+        }
+
+        function aboutme_page()
+        {
+            document.getElementById("form_screen").style.display = "none";
+            document.getElementById("aboutme_screen").style.display = 'flex';
+            stop_all_recognition();
+        }
+
+        function continue_from_resources()
+        {
+            document.getElementById("resources_screen").style.display = 'none';
+            document.getElementById("form_screen").style.display = 'block';
+            stop_all_recognition();
+        }
+
+        function continue_from_hobbies()
+        {
+            document.getElementById("hobbies_screen").style.display = 'none';
+            document.getElementById("form_screen").style.display = 'block';
+            stop_all_recognition();
+        }
+
+        function continue_from_about()
+        {
+            document.getElementById("aboutme_screen").style.display = 'none';
+            document.getElementById("form_screen").style.display = 'block';
+            stop_all_recognition();
+        }
+
+        function resources_page()
+        {
+            document.getElementById("form_screen").style.display = "none";
+            document.getElementById("resources_screen").style.display = 'flex';
+            stop_all_recognition();
+        }
+
+        function hobbies_page()
+        {
+            document.getElementById("form_screen").style.display = "none";
+            document.getElementById("hobbies_screen").style.display = 'flex';
+            stop_all_recognition();
+        }
+
+        function strengths_page()
+        {
+            document.getElementById("form_screen").style.display = "none";
+            document.getElementById("strength_screen").style.display = 'flex';
+            stop_all_recognition();
+        }
+
+        function school()
+        {
+            my_info.go_to_school = document.getElementById("go_to_school").checked;
+        }
+
+        function back()
+        {
+            document.getElementById("goals_screen").style.display = 'none';
+            document.getElementById("form_screen").style.display = 'block';
+            stop_all_recognition();
+        }
+
+        function goals_page()
+        {
+            document.getElementById("form_screen").style.display = "none";
+            document.getElementById("goals_screen").style.display = 'flex';
+            stop_all_recognition();
+        }
+
+        // Calendar navigation
+        function calendar_page()
+        {
+            document.getElementById("form_screen").style.display = "none";
+            document.getElementById("calendar_screen").style.display = "flex";
+            setupCalendarGrid();
+            renderAllCalendarEvents();
+        }
+
+        document.getElementById("calendar_continueBtn").onclick = function ()
+        {
+            document.getElementById("calendar_screen").style.display = "none";
+            document.getElementById("form_screen").style.display = "block";
+        };
+
+        // --- Speech Recognition Functionality ---
+        var recognition = null;
+        var last_interim_result = '';
+        var is_listening = false;
+        var current_active_button = null;
+        var last_known_text_length = 0;
+
+        function stop_all_recognition()
+        {
+            if (recognition)
+            {
+                recognition.stop();
+            }
+            if (current_active_button)
+            {
+                var mic_button = document.getElementById(current_active_button);
+                if (mic_button)
+                {
+                    mic_button.innerHTML = '<i class="fas fa-microphone"></i>';
+                    mic_button.classList.remove('listening');
+                }
+            }
+            is_listening = false;
+            current_active_button = null;
+            last_interim_result = '';
+        }
+
+        function toggle_speech_recognition(text_box_id, button_id)
+        {
+            var target_text_area = document.getElementById(text_box_id);
+            var mic_button = document.getElementById(button_id);
+
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window))
+            {
+                // Using a custom alert function instead of window.alert
+                showAlertMessage("Sorry, your browser doesn't support the Web Speech API. Please try Google Chrome or Microsoft Edge.", 'error');
+                return;
+            }
+
+            if (is_listening && current_active_button === button_id)
+            {
+                recognition.stop();
+                return;
+            } else if (is_listening)
+            {
+                stop_all_recognition();
+            }
+
+            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            mic_button.innerHTML = '<i class="fas fa-microphone"></i> Listening... <span class="listening-indicator"></span>';
+            mic_button.classList.add('listening');
+            is_listening = true;
+            current_active_button = button_id;
+            last_interim_result = '';
+            last_known_text_length = target_text_area.value.length;
+
+            recognition.onresult = function (event)
+            {
+                var interim_transcript = '';
+                var final_transcript = '';
+
+                for (var i = event.resultIndex; i < event.results.length; ++i)
+                {
+                    if (event.results[i].isFinal)
+                    {
+                        final_transcript += event.results[i][0].transcript;
+                    } else
+                    {
+                        interim_transcript += event.results[i][0].transcript;
+                    }
+                }
+
+                var current_text = target_text_area.value;
+
+                if (current_text.length !== last_known_text_length)
+                {
+                    last_interim_result = '';
+                }
+
+                if (current_text.endsWith(last_interim_result))
+                {
+                    current_text = current_text.substring(0, current_text.length - last_interim_result.length);
+                }
+
+                var text_to_add = final_transcript || interim_transcript;
+
+                if (text_to_add && current_text.length > 0)
+                {
+                    var last_char = current_text[current_text.length - 1];
+                    if (last_char !== ' ' && !['.', ',', '!', '?', ';', ':'].includes(last_char))
+                    {
+                        text_to_add = ' ' + text_to_add;
+                    }
+                }
+
+                if (final_transcript)
+                {
+                    var should_capitalize = false;
+                    if (current_text.length === 0)
+                    {
+                        should_capitalize = true;
+                    } else
+                    {
+                        var last_chars = current_text.slice(-2);
+                        if (last_chars === ". " || last_chars === ".\n" || last_chars === "!\n" || last_chars === "?\n")
+                        {
+                            should_capitalize = true;
+                        } else if (current_text.length >= 1 && ['.', '!', '?'].includes(current_text[current_text.length - 1]))
+                        {
+                            should_capitalize = true;
+                        }
+                    }
+
+                    if (should_capitalize)
+                    {
+                        text_to_add = text_to_add.charAt(0).toUpperCase() + text_to_add.slice(1);
+                    } else
+                    {
+                        text_to_add = text_to_add.charAt(0).toLowerCase() + text_to_add.slice(1);
+                    }
+                }
+
+                target_text_area.value = current_text + text_to_add;
+                target_text_area.scrollTop = target_text_area.scrollHeight;
+
+                last_interim_result = interim_transcript;
+                last_known_text_length = target_text_area.value.length;
+            };
+
+            recognition.onend = function ()
+            {
+                mic_button.innerHTML = '<i class="fas fa-microphone"></i>';
+                mic_button.classList.remove('listening');
+                is_listening = false;
+                current_active_button = null;
+                last_interim_result = '';
+                last_known_text_length = target_text_area.value.length;
+            };
+
+            recognition.onerror = function (event)
+            {
+                if (event.error === 'not-allowed')
+                {
+                    showAlertMessage('Microphone access denied. Please allow microphone access in your browser settings.', 'error');
+                }
+                mic_button.innerHTML = '<i class="fas fa-microphone"></i>';
+                mic_button.classList.remove('listening');
+                is_listening = false;
+                current_active_button = null;
+                last_interim_result = '';
+                last_known_text_length = target_text_area.value.length;
+            };
+
+            recognition.start();
+        }
+
+        var server = "http://localhost:3000"
+        var generated_schedule;
+        async function submit()
+        {
+            stop_all_recognition();
+
+            my_info.resources = [];
+
+            if (document.getElementById("have_ai_pc").checked)
+                my_info.resources.push("AI PC");
+            if (document.getElementById("have_arduino").checked)
+                my_info.resources.push("Arduino");
+            if (document.getElementById("have_computer").checked)
+                my_info.resources.push("Computer");
+            if (document.getElementById("have_books").checked)
+                my_info.resources.push("Books");
+            if (document.getElementById("have_instrument").checked)
+                my_info.resources.push("Musical Instrument");
+            if (document.getElementById("have_art_supplies").checked)
+                my_info.resources.push("Art Supplies");
+            if (document.getElementById("have_sports_equipment").checked)
+                my_info.resources.push("Sports Equipment");
+
+            if (document.getElementById("resources_text_box_checkmark").checked)
+            {
+                my_info.resources = my_info.resources.concat(otherResources);
+            }
+
+            my_info.hobbies = document.getElementById("hobbies_text_box").value;
+            my_info.age = document.getElementById("age_text_box").value;
+            my_info.goals = document.getElementById("goals_text_box").value;
+            my_info.sports = document.getElementById("sports_text_box").value;
+            my_info.strengths = document.getElementById("strength_text_box").value;
+            my_info.more_info = document.getElementById("about_text_box").value;
+            my_info.weaknesses = document.getElementById("weaknesses").value;
+            my_info.therty_day = document.getElementById("therty").value;
+
+            // Save calendar events to sessionStorage as well
+            my_info.fixedSchedule = calendar_events;
+
+            var about_me = JSON.parse(sessionStorage.getItem('about_me') || '{}');
+            var user = about_me?.my_login_info?.user ?? 0;
+            var bodie = JSON.stringify({
+                my_info: my_info,
+                user: user
+            })
+            console.log("submited" + bodie)
+            var response = await fetch(server + '/submit_form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: bodie
+            });
+            var data = await response.json();
+            generated_schedule = data.schedule
+            schedule_screen()
+        }
+
+        function schedule_screen()
+        {
+            var about_me = {
+                my_login_info,
+                my_info: my_info,
+                generated_schedule: generated_schedule
+            };
+            sessionStorage.setItem('about_me', JSON.stringify(about_me));
+
+            // Play the sound
+            var audio = document.getElementById('calendarReadySound');
+            if (audio)
+            {
+                audio.currentTime = 0;
+                audio.play().catch(() => { }); // Ignore play errors (e.g., if user hasn't interacted)
+            }
+
+            // Wait 1.5 seconds, then transition
+            setTimeout(() =>
+            {
+                calendar_html();
+            }, 1500);
+        }
+        function calendar_html()
+        {
+            window.location.href = "calendar.html";
+        }
+        // --- Tag input for "other" resources ---
+        let otherResources = [];
+
+        function renderOtherResourcesTags()
+        {
+            const tagContainer = document.getElementById('other_resources_tags');
+            tagContainer.innerHTML = '';
+            otherResources.forEach((tag, idx) =>
+            {
+                const tagElem = document.createElement('span');
+                tagElem.textContent = tag;
+                tagElem.style = "display:inline-block;background:#e0e0e0;padding:3px 10px;border-radius:12px;margin:2px 4px 2px 0;font-size:14px;cursor:pointer;transition:background 0.2s;";
+                tagElem.title = "Click to remove";
+                tagElem.onclick = () =>
+                {
+                    otherResources.splice(idx, 1);
+                    renderOtherResourcesTags();
+                };
+                tagContainer.appendChild(tagElem);
+            });
+        }
+
+        document.getElementById('resources_text_box').addEventListener('keydown', function (e)
+        {
+            if (e.key === 'Enter')
+            {
+                e.preventDefault();
+                const value = this.value.trim();
+                if (value && !otherResources.includes(value))
+                {
+                    otherResources.push(value);
+                    this.value = '';
+                    renderOtherResourcesTags();
+                }
+            }
+        });
+
+        // =========================
+        // CALENDAR LOGIC
+        // =========================
+        const MY_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const START_HOUR = 5;
+        const HOURS = 24;
+        const HOUR_HEIGHT = 80;
+        const DRAG_STEP_MINUTES = 15;
+
+        let calendarGrid, modal, titleInput, typeSelect, startInput, durationInput, notesInput, saveBtn, deleteBtn, cancelBtn, modalOverlay;
+        let activeEvent = null;
+        let isDraggingToCreate = false;
+        let dragStartDay = null;
+        let dragStartY = null;
+        let dragCurrentY = null;
+        let dragPreviewDiv = null;
+
+        function setupCalendarGrid()
+        {
+            calendarGrid = document.getElementById("calendarGrid");
+            modal = document.getElementById("modalOverlay");
+            titleInput = document.getElementById("eventTitleInput");
+            typeSelect = document.getElementById("eventTypeSelect");
+            startInput = document.getElementById("eventStartInput");
+            durationInput = document.getElementById("eventDurationInput");
+            notesInput = document.getElementById("eventNotesInput");
+            saveBtn = document.getElementById("saveBtn");
+            deleteBtn = document.getElementById("deleteBtn");
+            cancelBtn = document.getElementById("cancelBtn");
+            modalOverlay = document.getElementById("modalOverlay");
+
+            calendarGrid.innerHTML = "";
+            for (let h = 0; h < HOURS; h++)
+            {
+                const hourLabel = (START_HOUR + h) % 24;
+                const ampm = hourLabel < 12 || hourLabel === 24 ? "AM" : "PM";
+                const displayHour = hourLabel % 12 === 0 ? 12 : hourLabel % 12;
+                const label = `${displayHour}:00 ${ampm}`;
+
+                const timeCell = createDiv("timeCell", label);
+                calendarGrid.appendChild(timeCell);
+
+                for (let d = 0; d < 7; d++)
+                {
+                    const dayCell = createDiv("dayCell");
+                    dayCell.dataset.day = d;
+                    dayCell.dataset.hour = h;
+
+                    dayCell.addEventListener("mousedown", (e) =>
+                    {
+                        if (e.button !== 0) return;
+                        isDraggingToCreate = true;
+                        dragStartDay = d;
+                        const gridRect = calendarGrid.getBoundingClientRect();
+                        dragStartY = e.clientY - gridRect.top;
+                        dragCurrentY = dragStartY;
+                        show_drag_prev(d, dragStartY, dragCurrentY);
+                        document.body.style.userSelect = "none";
+                    });
+
+                    calendarGrid.appendChild(dayCell);
+                }
+
+                const line = document.createElement("div");
+                line.className = "hour-line";
+                line.style.top = `${h * HOUR_HEIGHT}px`;
+                calendarGrid.appendChild(line);
+            }
+
+            calendarGrid.addEventListener("mousemove", calendar_mousemove);
+            calendarGrid.addEventListener("mouseup", calendar_mouseup);
+            document.addEventListener("mouseup", calendar_mouseup);
+
+            saveBtn.onclick = calendar_save_event;
+            deleteBtn.onclick = calendar_delete_event;
+            cancelBtn.onclick = closeModal;
+        }
+
+        function calendar_mousemove(e)
+        {
+            if (isDraggingToCreate && dragStartDay !== null)
+            {
+                const gridRect = calendarGrid.getBoundingClientRect();
+                const x = e.clientX - gridRect.left;
+                const y = e.clientY - gridRect.top;
+                const dayWidth = (calendarGrid.clientWidth - 90) / 7;
+                const d = Math.floor((x - 90) / dayWidth);
+                if (d === dragStartDay)
+                {
+                    dragCurrentY = y;
+                    show_drag_prev(dragStartDay, dragStartY, dragCurrentY);
+                }
+            }
+        }
+        function calendar_mouseup(e)
+        {
+            if (isDraggingToCreate && dragStartDay !== null)
+            {
+                const gridRect = calendarGrid.getBoundingClientRect();
+                const y = (e && e.clientY ? e.clientY : dragCurrentY) - gridRect.top;
+                const minY = Math.min(dragStartY, y);
+                const maxY = Math.max(dragStartY, y);
+                const startMin = Math.round((minY / HOUR_HEIGHT) * 60 / DRAG_STEP_MINUTES) * DRAG_STEP_MINUTES + START_HOUR * 60;
+                const endMin = Math.round((maxY / HOUR_HEIGHT) * 60 / DRAG_STEP_MINUTES) * DRAG_STEP_MINUTES + START_HOUR * 60;
+                const duration = Math.max(endMin - startMin, DRAG_STEP_MINUTES);
+                modal.dataset.day = dragStartDay;
+                startInput.value = minutesToTime(startMin);
+                durationInput.value = duration;
+                openModal(null, startMin, duration, dragStartDay);
+                isDraggingToCreate = false;
+                hide_drag_prev();
+                document.body.style.userSelect = "";
+            }
+        }
+
+        function show_drag_prev(day, y1, y2)
+        {
+            hide_drag_prev();
+            const minY = Math.min(y1, y2);
+            const maxY = Math.max(y1, y2);
+            const startMin = Math.round((minY / HOUR_HEIGHT) * 60 / DRAG_STEP_MINUTES) * DRAG_STEP_MINUTES + START_HOUR * 60;
+            const endMin = Math.round((maxY / HOUR_HEIGHT) * 60 / DRAG_STEP_MINUTES) * DRAG_STEP_MINUTES + START_HOUR * 60;
+            const dayWidth = (calendarGrid.clientWidth - 90) / 7 - 4;
+            const left = 90 + day * ((calendarGrid.clientWidth - 90) / 7);
+            const top = ((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT;
+            const height = Math.max(((endMin - startMin) / 60) * HOUR_HEIGHT, 20);
+            const timeRange = `${formatTime(startMin)} - ${formatTime(endMin)}`;
+            const preview = document.createElement("div");
+            preview.className = "eventBox";
+            preview.style.pointerEvents = "none";
+            preview.style.opacity = "0.5";
+            preview.style.background = "#888";
+            preview.style.left = `${left}px`;
+            preview.style.top = `${top}px`;
+            preview.style.height = `${height}px`;
+            preview.style.width = `${dayWidth}px`;
+            preview.innerHTML = `<div style="text-align:center;margin-top:10px;">New Event<br><small>${timeRange}</small></div>`;
+            calendarGrid.appendChild(preview);
+            dragPreviewDiv = preview;
+        }
+        function hide_drag_prev()
+        {
+            if (dragPreviewDiv)
+            {
+                dragPreviewDiv.remove();
+                dragPreviewDiv = null;
+            }
+        }
+
+        function createDiv(cls, txt = "")
+        {
+            const d = document.createElement("div");
+            d.className = cls;
+            d.textContent = txt;
+            return d;
+        }
+
+        function formatTime(mins)
+        {
+            const h24 = Math.floor(mins / 60) % 24;
+            const m = mins % 60;
+            const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+            const ampm = h24 >= 12 ? "PM" : "AM";
+            return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+        }
+
+        function timeToMinutes(t)
+        {
+            const [h, m] = t.split(":").map(Number);
+            return h * 60 + m;
+        }
+
+        function minutesToTime(mins)
+        {
+            const h = Math.floor(mins / 60) % 24;
+            const m = mins % 60;
+            return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+        }
+
+        function getColorForType(type)
+        {
+            const preset = {
+                school: "#3498db",
+                work: "#e67e22",
+                party: "#9b59b6",
+                other: "#2ecc71",
+                meal: "#e17055",
+                "personal care": "#00b894",
+                sports: "#fdcb6e",
+                relaxation: "#a29bfe"
+            };
+            if (preset[type]) return preset[type];
+            let hash = 0;
+            for (let i = 0; i < type.length; i++)
+            {
+                hash = type.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const h = Math.abs(hash) % 360;
+            return `hsl(${h},70%,65%)`;
+        }
+
+        function addDragListeners(el, data)
+        {
+            const moveHandle = el.querySelector(".moveHandle");
+            const resizeHandle = el.querySelector(".resizeHandle");
+
+            let startY, startTop, startHeight;
+
+            moveHandle.onmousedown = (e) =>
+            {
+                e.stopPropagation();
+                startY = e.clientY;
+                startTop = parseFloat(el.style.top);
+                document.onmousemove = (ev) =>
+                {
+                    const delta = ev.clientY - startY;
+                    const newTop = startTop + delta;
+                    el.style.top = `${newTop}px`;
+                    data.start = Math.round(newTop / (HOUR_HEIGHT / 60) + START_HOUR * 60);
+                    el.querySelector("small").textContent = `${formatTime(data.start)} - ${formatTime(data.start + data.duration)}`;
+                };
+                document.onmouseup = () => document.onmousemove = null;
+            };
+
+            resizeHandle.onmousedown = (e) =>
+            {
+                e.stopPropagation();
+                startY = e.clientY;
+                startHeight = parseFloat(el.style.height);
+                document.onmousemove = (ev) =>
+                {
+                    const delta = ev.clientY - startY;
+                    const newHeight = Math.max(15, startHeight + delta);
+                    el.style.height = `${newHeight}px`;
+                    data.duration = Math.round(newHeight / (HOUR_HEIGHT / 60));
+                    el.querySelector("small").textContent = `${formatTime(data.start)} - ${formatTime(data.start + data.duration)}`;
+                };
+                document.onmouseup = () => document.onmousemove = null;
+            };
+        }
+
+        function createCalendarEvent(data)
+        {
+            const e = document.createElement("div");
+            e.className = "eventBox";
+            e.dataset.id = data.id;
+            e.dataset.type = data.type;
+
+            const dayWidth = (calendarGrid.clientWidth - 90) / 7 - 4;
+            const left = 90 + data.day * ((calendarGrid.clientWidth - 90) / 7);
+            const top = (data.start - START_HOUR * 60) * (HOUR_HEIGHT / 60);
+            const realHeight = data.duration * (HOUR_HEIGHT / 60);
+            const minHeight = 40;
+            const displayHeight = Math.max(realHeight, minHeight);
+
+            e.style.left = `${left}px`;
+            e.style.top = `${top}px`;
+            e.style.height = `${displayHeight}px`;
+            e.style.width = `${dayWidth}px`;
+            e.style.background = getColorForType(data.type);
+
+            let timeRange = `${formatTime(data.start)} - ${formatTime(data.start + data.duration)}`;
+            let durationNote = (realHeight < minHeight) ? `<span style="font-size:0.7em;color:#fff8;">(short event)</span>` : "";
+
+            e.innerHTML = `
+<div class="moveHandle"></div>
+<div>${data.title}</div>
+<div style="font-size:0.8em; font-weight:400; margin:2px 0 4px 0; color:#fffbe7; white-space:pre-line;">${data.notes || ""}</div>
+<small>${timeRange} ${durationNote}</small>
+<div class="resizeHandle"></div>
+`;
+
+            e.addEventListener("click", (ev) =>
+            {
+                ev.stopPropagation();
+                openModal(data);
+            });
+
+            addDragListeners(e, data);
+
+            calendarGrid.appendChild(e);
+        }
+
+        function renderAllCalendarEvents()
+        {
+            if (!calendarGrid) return;
+            calendarGrid.querySelectorAll(".eventBox").forEach(e => e.remove());
+            calendar_events.forEach(e => createCalendarEvent(e));
+        }
+
+        function openModal(eventData = null, start = null, duration = null, day = null)
+        {
+            modalOverlay.style.display = "flex";
+            if (eventData)
+            {
+                activeEvent = eventData;
+                titleInput.value = eventData.title;
+                typeSelect.value = eventData.type;
+                startInput.value = minutesToTime(eventData.start);
+                durationInput.value = eventData.duration;
+                notesInput.value = eventData.notes;
+                deleteBtn.style.display = "block";
+            } else
+            {
+                activeEvent = null;
+                titleInput.value = "";
+                typeSelect.value = "other";
+                startInput.value = start !== null ? minutesToTime(start) : "08:00";
+                durationInput.value = duration !== null ? duration : 60;
+                notesInput.value = "";
+                deleteBtn.style.display = "none";
+            }
+            if (day !== null) modal.dataset.day = day;
+        }
+
+        function closeModal()
+        {
+            modalOverlay.style.display = "none";
+            activeEvent = null;
+        }
+
+        function calendar_save_event()
+        {
+            const title = titleInput.value.trim();
+            const type = typeSelect.value;
+            const start = timeToMinutes(startInput.value);
+            const duration = parseInt(durationInput.value);
+            const notes = notesInput.value.trim();
+
+            if (!title)
+            {
+                showAlertMessage("Title required", 'error');
+                return;
+            }
+
+            if (activeEvent)
+            {
+                activeEvent.title = title;
+                activeEvent.type = type;
+                activeEvent.start = start;
+                activeEvent.duration = duration;
+                activeEvent.notes = notes;
+            } else
+            {
+                const id = "event-" + Date.now();
+                calendar_events.push({
+                    id, day: modal.dataset.day * 1,
+                    title, type, start, duration, notes
+                });
+            }
+
+            renderAllCalendarEvents();
+            closeModal();
+        }
+
+        function calendar_delete_event()
+        {
+            calendar_events = calendar_events.filter(e => e !== activeEvent);
+            renderAllCalendarEvents();
+            closeModal();
+        }
+
+
+        // =========================
+        // GOOGLE CALENDAR IMPORT LOGIC
+        // =========================
+        function showGoogleCalendarImport()
+        {
+            document.getElementById("calendar_screen").style.display = "none";
+            document.getElementById("google_calendar_import_screen").style.display = "flex";
+            hideImportAlert();
+        }
+
+        function backToCalendarFromImport()
+        {
+            document.getElementById("google_calendar_import_screen").style.display = "none";
+            calendar_page(); // Go back to the calendar screen
+        }
+
+        function showAlertMessage(message, type)
+        {
+            const alertDiv = document.getElementById('importAlert');
+            if (alertDiv)
+            {
+                alertDiv.textContent = message;
+                alertDiv.className = `alert ${type}`;
+                alertDiv.classList.remove('hidden');
+            } else
+            {
+                console.error("Alert div not found for import screen.");
+                // Fallback for development if div is missing, in production use a custom modal
+                // alert(message); 
+            }
+        }
+
+        function hideImportAlert()
+        {
+            const alertDiv = document.getElementById('importAlert');
+            if (alertDiv)
+            {
+                alertDiv.classList.add('hidden');
+            }
+        }
+
+        function parseICalData(icalData)
+        {
+            const events = [];
+            const lines = icalData.split('\n');
+            let currentEvent = null;
+            let inEvent = false;
+
+            for (let i = 0; i < lines.length; i++)
+            {
+                const line = lines[i].trim();
+
+                if (line === 'BEGIN:VEVENT')
+                {
+                    inEvent = true;
+                    currentEvent = {
+                        id: '',
+                        title: '',
+                        description: '',
+                        start: {},
+                        end: {},
+                        location: '',
+                        status: 'confirmed'
+                    };
+                } else if (line === 'END:VEVENT' && inEvent)
+                {
+                    if (currentEvent.id)
+                    {
+                        events.push(currentEvent);
+                    }
+                    inEvent = false;
+                    currentEvent = null;
+                } else if (inEvent && currentEvent)
+                {
+                    if (line.startsWith('UID:'))
+                    {
+                        currentEvent.id = line.substring(4);
+                    } else if (line.startsWith('SUMMARY:'))
+                    {
+                        currentEvent.title = line.substring(8);
+                    } else if (line.startsWith('DESCRIPTION:'))
+                    {
+                        currentEvent.description = line.substring(12);
+                    } else if (line.startsWith('LOCATION:'))
+                    {
+                        currentEvent.location = line.substring(9);
+                    } else if (line.startsWith('DTSTART'))
+                    {
+                        const dateStr = line.split(':')[1];
+                        if (dateStr)
+                        {
+                            if (dateStr.length === 8)
+                            {
+                                const year = dateStr.substring(0, 4);
+                                const month = dateStr.substring(4, 6);
+                                const day = dateStr.substring(6, 8);
+                                currentEvent.start.date = `${year}-${month}-${day}`;
+                            } else
+                            {
+                                const isoDate = dateStr.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z?/, '$1-$2-$3T$4:$5:$6Z');
+                                currentEvent.start.dateTime = isoDate;
+                            }
+                        }
+                    } else if (line.startsWith('DTEND'))
+                    {
+                        const dateStr = line.split(':')[1];
+                        if (dateStr)
+                        {
+                            if (dateStr.length === 8)
+                            {
+                                const year = dateStr.substring(0, 4);
+                                const month = dateStr.substring(4, 6);
+                                const day = dateStr.substring(6, 8);
+                                currentEvent.end.date = `${year}-${month}-${day}`;
+                            } else
+                            {
+                                const isoDate = dateStr.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z?/, '$1-$2-$3T$4:$5:$6Z');
+                                currentEvent.end.dateTime = isoDate;
+                            }
+                        }
+                    } else if (line.startsWith('STATUS:'))
+                    {
+                        currentEvent.status = line.substring(7).toLowerCase();
+                    }
+                }
+            }
+            return events;
+        }
+
+        async function importGoogleCalendarEvents()
+        {
+            const calendarUrlInput = document.getElementById('calendarUrl');
+            const calendarUrl = calendarUrlInput.value.trim();
+
+            if (!calendarUrl)
+            {
+                showAlertMessage('Please provide a calendar URL or ID.', 'error');
+                return;
+            }
+
+            let icalUrl = calendarUrl;
+            if (icalUrl.includes('calendar.google.com/calendar/embed'))
+            {
+                const match = icalUrl.match(/src=([^&]+)/);
+                if (match)
+                {
+                    const calendarId = decodeURIComponent(match[1]);
+                    icalUrl = `https://calendar.google.com/calendar/ical/${encodeURIComponent(calendarId)}/public/basic.ics`;
+                }
+            } else if (icalUrl.includes('@gmail.com') && !icalUrl.includes('.ics'))
+            {
+                icalUrl = `https://calendar.google.com/calendar/ical/${encodeURIComponent(icalUrl)}/public/basic.ics`;
+            }
+
+            document.getElementById('importGoogleCalendarEventsBtn').disabled = true;
+            document.getElementById('importLoading').classList.remove('hidden');
+            hideImportAlert();
+
+            try
+            {
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(icalUrl)}`;
+                const response = await fetch(proxyUrl);
+
+                if (!response.ok)
+                {
+                    throw new Error(`Failed to fetch calendar: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                let icalData = data.contents;
+
+                if (icalData && icalData.startsWith('data:text/calendar'))
+                {
+                    const base64Match = icalData.match(/base64,(.+)$/);
+                    if (base64Match)
+                    {
+                        icalData = atob(base64Match[1]);
+                    }
+                }
+
+                if (!icalData || !icalData.includes('BEGIN:VCALENDAR'))
+                {
+                    throw new Error('Invalid calendar data received. Make sure the calendar is public and the URL is correct.');
+                }
+
+                const importedEvents = parseICalData(icalData);
+
+                if (importedEvents.length === 0)
+                {
+                    showAlertMessage('No events found in the calendar.', 'error');
+                    return;
+                }
+
+                // Calculate current week's start and end for filtering
+                const now = new Date();
+                const startOfWeek = new Date(now);
+                // Adjust to Monday of the current week (getDay() returns 0 for Sunday, 1 for Monday, etc.)
+                startOfWeek.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1));
+                startOfWeek.setHours(0, 0, 0, 0);
+
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 7); // Next Monday, exclusive
+
+
+                // Convert and add imported events to calendar_events
+                const dayMap = {
+                    0: 6, // Sunday (maps to day index 6 for display)
+                    1: 0, // Monday (maps to day index 0 for display)
+                    2: 1,
+                    3: 2,
+                    4: 3,
+                    5: 4,
+                    6: 5
+                };
+
+                importedEvents.forEach(evt =>
+                {
+                    const title = evt.title || 'Imported Event';
+                    const notes = evt.description || '';
+                    const date = evt.start?.dateTime || evt.start?.date;
+                    const end = evt.end?.dateTime || evt.end?.date;
+
+                    if (!date)
+                    {
+                        console.warn(`Skipping event "${title}" due to missing start date.`);
+                        return; // Skip events without a start date
+                    }
+
+                    const startDate = new Date(date);
+
+                    // Filter: Only add events that fall within the current week
+                    if (startDate < startOfWeek || startDate >= endOfWeek)
+                    {
+                        return; // Skip events outside current week
+                    }
+
+                    const endDate = new Date(end);
+                    let dayIndex = dayMap[startDate.getDay()] ?? 0;
+                    let startMinutes = startDate.getHours() * 60 + startDate.getMinutes();
+                    let durationMinutes = (endDate - startDate) / (1000 * 60);
+                    if (isNaN(durationMinutes) || durationMinutes <= 0) durationMinutes = 60; // Default to 1 hour if calculation fails
+
+                    // Add to existing calendar_events, avoiding duplicates by ID if possible
+                    // For simplicity, this example just adds. A more robust solution would check for existing IDs.
+                    calendar_events.push({
+                        id: 'import-' + Math.random().toString(36).slice(2), // Generate a unique ID
+                        title,
+                        type: 'other', // Default type, user can edit later
+                        start: startMinutes,
+                        duration: durationMinutes,
+                        notes,
+                        day: dayIndex
+                    });
+                });
+
+                showAlertMessage(`Successfully imported ${calendar_events.length} events for the current week!`, 'success');
+                // Automatically go back to the calendar screen after a short delay
+                setTimeout(() =>
+                {
+                    backToCalendarFromImport();
+                }, 1500);
+
+            } catch (error)
+            {
+                showAlertMessage(error.message, 'error');
+            } finally
+            {
+                document.getElementById('importGoogleCalendarEventsBtn').disabled = false;
+                document.getElementById('importLoading').classList.add('hidden');
+            }
+        }
+
+        // Allow Enter key to trigger import on the import screen
+        document.getElementById('calendarUrl').addEventListener('keypress', function (e)
+        {
+            if (e.key === 'Enter')
+            {
+                importGoogleCalendarEvents();
+            }
+        });
+
+    </script>
+</body>
+
+</html>

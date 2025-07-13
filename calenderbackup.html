@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Smart Calendar - Daily Planner Enhanced</title>
+	<style>
+		/* Base styles */
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+
+		:root {
+			--primary: #2563eb;
+			--primary-dark: #1e40af;
+			--background: #ffffff;
+			--foreground: #1f2937;
+			--card: #f9fafb;
+			--border: rgba(0, 0, 0, 0.1);
+			--muted: #f3f4f6;
+			--muted-foreground: #6b7280;
+			--accent: #e5e7eb;
+			--shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+			--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+			--transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+
+		body {
+			font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+			background-color: #f8fafc;
+			background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23dcdcdc' stroke-width='0.6'%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%23ccc'/%3E%3Ccircle cx='90' cy='10' r='1.5' fill='%23ccc'/%3E%3Ccircle cx='50' cy='50' r='1.5' fill='%23ccc'/%3E%3Ccircle cx='10' cy='90' r='1.5' fill='%23ccc'/%3E%3Ccircle cx='90' cy='90' r='1.5' fill='%23ccc'/%3E%3Cline x1='10' y1='10' x2='50' y2='50'/%3E%3Cline x1='90' y1='10' x2='50' y2='50'/%3E%3Cline x1='10' y1='90' x2='50' y2='50'/%3E%3Cline x1='90' y1='90' x2='50' y2='50'/%3E%3C/g%3E%3C/svg%3E");
+			background-size: 200px 200px;
+			height: 100vh;
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+			/* Center the calendar container */
+			/* Align to top */
+			/* Adjusted to rem for responsiveness */
+			padding-bottom: 2rem;
+			/* Added padding to bottom */
+		}
+
+		.calendar-container {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			display: flex;
+			flex-direction: column;
+			width: 100vw;
+			height: 100vh;
+			background: var(--background);
+			overflow: hidden;
+		}
+
+		/* Header */
+		.header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 1rem 1.5rem;
+			border-bottom: 1px solid var(--border);
+			background: var(--card);
+			box-shadow: var(--shadow);
+			z-index: 10;
+			user-select: none;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+			/* Reduced gap for "squished" look */
+			border-radius: 12px 12px 0 0;
+			/* Match parent border-radius */
+		}
+
+		.header-left {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			/* Reduced gap */
+			flex-wrap: wrap;
+		}
+
+		.logo {
+			font-size: 1.6rem;
+			font-weight: 600;
+			color: var(--primary);
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.nav-controls {
+			display: flex;
+			align-items: center;
+			gap: 0.3rem;
+			/* Even smaller gap for buttons */
+		}
+
+		.btn {
+			padding: 0.5rem 1rem;
+			/* Slightly smaller padding */
+			border: 1px solid var(--border);
+			border-radius: 0.5rem;
+			background: var(--muted);
+			/* Use muted for general buttons */
+			color: var(--foreground);
+			cursor: pointer;
+			transition: var(--transition);
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 0.85rem;
+			/* Slightly smaller font */
+			font-weight: 500;
+			box-shadow: var(--shadow);
+		}
+
+		.btn:hover {
+			background: var(--accent);
+			border-color: var(--muted-foreground);
+		}
+
+		.btn-primary {
+			background: var(--primary);
+			color: white;
+			border-color: var(--primary);
+		}
+
+		.btn-primary:hover {
+			background: var(--primary-dark);
+			border-color: var(--primary-dark);
+		}
+
+		.btn-icon {
+			padding: 0.5rem;
+			width: 3.5vw;
+			/* Converted from 2.5rem to vw */
+			height: 3.5vw;
+			/* Converted from 2.5rem to vw */
+			max-width: 2.5rem;
+			/* Max size to prevent huge buttons on large screens */
+			max-height: 2.5rem;
+			/* Max size to prevent huge buttons on large screens */
+			font-size: 1.1rem;
+			/* Smaller icon font */
+		}
+
+		.current-date {
+			font-size: 1.2rem;
+			/* Slightly smaller font */
+			font-weight: 500;
+			user-select: text;
+			color: var(--foreground);
+		}
+
+		/* All-day event container */
+		.all-day-container {
+			display: flex;
+			border-bottom: 1px solid var(--border);
+			padding: 0.5rem 0.7vw;
+			/* Converted 10px to vw */
+			background: var(--muted);
+			overflow-x: auto;
+			flex-shrink: 0;
+		}
+
+		.all-day-label {
+			position: sticky;
+			left: 0;
+			width: 70px;
+			/* Kept px for time column structure */
+			min-width: 70px;
+			/* Kept px for time column structure */
+			font-size: 0.75rem;
+			font-weight: 600;
+			padding-top: 0.6rem;
+			color: var(--muted-foreground);
+			background: var(--muted);
+			border-right: 1px solid var(--border);
+			user-select: none;
+			flex-shrink: 0;
+			text-align: right;
+			padding-right: 5px;
+			/* Kept px for small detail */
+		}
+
+		.all-day-events {
+			display: flex;
+			gap: 0.4rem;
+			flex-grow: 1;
+			min-height: 2.8rem;
+			padding-left: 0.7vw;
+			/* Converted 10px to vw */
+		}
+
+		.event-all-day {
+			/* color is set dynamically by JS */
+			padding: 0.5rem 0.8rem;
+			/* Increased padding */
+			border-radius: 0.375rem;
+			font-size: 1rem;
+			/* Increased font size */
+			font-weight: 600;
+			cursor: pointer;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			transition: var(--transition);
+			flex-shrink: 0;
+			max-width: 15vw;
+			/* Converted from 200px to vw */
+			box-shadow: var(--shadow);
+		}
+
+		.event-all-day:hover {
+			filter: brightness(1.1);
+			box-shadow: var(--shadow-lg);
+		}
+
+		/* Calendar Grid (Daily View) */
+		.calendar-grid {
+			flex: 1;
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.days-header {
+			display: grid;
+			grid-template-columns: 70px 1fr;
+			/* Kept px for time column structure */
+			border-bottom: 1px solid var(--border);
+			background: var(--muted);
+			flex-shrink: 0;
+		}
+
+		.day-header {
+			padding: 0.8rem 0.5rem;
+			text-align: center;
+			border-right: 1px solid var(--border);
+			font-weight: 500;
+			user-select: none;
+			color: var(--muted-foreground);
+			font-size: 0.85rem;
+		}
+
+		.day-header.today {
+			background: var(--primary);
+			color: white;
+			border-color: var(--primary);
+		}
+
+		.time-grid {
+			flex: 1;
+			overflow-y: auto;
+			display: grid;
+			grid-template-columns: 70px 1fr;
+			/* Kept px for time column structure */
+			position: relative;
+			scroll-behavior: smooth;
+			background: var(--card);
+		}
+
+		.time-slot {
+			padding: 0.2rem 0.5rem 0.2rem 0.75rem;
+			font-size: 0.7rem;
+			color: var(--muted-foreground);
+			border-right: 1px solid var(--border);
+			border-bottom: 1px solid var(--border);
+			background: var(--muted);
+			text-align: right;
+			font-feature-settings: "tnum";
+			user-select: none;
+			line-height: 1.5;
+			height: 36px;
+			/* Kept px for consistent time grid vertical rhythm */
+			display: flex;
+			align-items: flex-start;
+			justify-content: flex-end;
+			padding-top: 0;
+		}
+
+		.time-slot.half {
+			border-bottom: none;
+			padding-bottom: 0;
+			height: 36px;
+			/* Kept px for consistent time grid vertical rhythm */
+		}
+
+		.day-column {
+			border-right: 1px solid var(--border);
+			min-height: 4rem;
+			position: relative;
+		}
+
+		.hour-slot {
+			height: 36px;
+			/* Kept px for consistent time grid vertical rhythm */
+			border-bottom: 1px solid var(--border);
+			cursor: pointer;
+			transition: var(--transition);
+			position: relative;
+		}
+
+		.hour-slot:hover {
+			background: var(--accent);
+		}
+
+		.hour-slot.today {
+			background: rgba(59, 130, 246, 0.05);
+		}
+
+		/* Current time indicator */
+		.current-time-line {
+			position: absolute;
+			left: 70px;
+			/* Aligned with the start of the event column */
+			right: 0;
+			height: 2px;
+			/* Kept px for thin line */
+			background-color: #ea4335;
+			z-index: 20;
+			pointer-events: none;
+		}
+
+		.current-time-line::before {
+			content: '';
+			position: absolute;
+			left: -5px;
+			/* Adjusted to be relative to the line itself */
+			top: -4px;
+			/* Adjusted to be relative to the line itself */
+			width: 10px;
+			/* Kept px for small detail */
+			height: 10px;
+			/* Kept px for small detail */
+			background-color: #ea4335;
+			border-radius: 50%;
+		}
+
+		/* Events */
+		.event {
+			position: absolute;
+			/* color is set dynamically by JS */
+			padding: 0.6rem 0.9rem;
+			/* Increased padding */
+			border-radius: 0.375rem;
+			font-weight: 600;
+			cursor: pointer;
+			transition: var(--transition);
+			z-index: 5;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: normal;
+			box-shadow: var(--shadow);
+			user-select: none;
+			border: 1px solid rgba(0, 0, 0, 0.2);
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-start;
+			line-height: 1.4;
+			/* Adjusted line height for better spacing */
+			/* Positioning relative to the 1fr column within time-grid */
+			left: calc(70px + 0.3vw);
+			/* Start after the 70px time column + a small margin */
+			width: calc(100% - 70px - 0.6vw);
+			/* 100% of parent minus time column width and total horizontal margins */
+			min-height: 2.5rem;
+			/* Increased minimum height and kept rem */
+		}
+
+		.event:hover {
+			transform: scale(1.02);
+			box-shadow: var(--shadow-lg);
+			z-index: 10;
+		}
+
+		.event-title {
+			font-weight: 700;
+			font-size: 1.1rem;
+			/* Increased font size */
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.event-time-display {
+			font-size: 1rem;
+			/* Increased font size */
+			opacity: 0.9;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.event-description-display {
+			font-size: 0.9rem;
+			/* Increased font size */
+			opacity: 0.8;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			margin-top: 0.2rem;
+		}
+
+		/* Modal */
+		.modal {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.6);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 100;
+			opacity: 0;
+			visibility: hidden;
+			transition: opacity 0.3s ease, visibility 0.3s ease;
+		}
+
+		.modal.active {
+			opacity: 1;
+			visibility: visible;
+		}
+
+		.modal-content {
+			background: var(--card);
+			border-radius: 0.75rem;
+			padding: 1.8rem;
+			width: 95%;
+			max-width: 40vw;
+			/* Converted from 550px to vw */
+			box-shadow: var(--shadow-lg);
+			transform: translateY(-20px);
+			transition: transform 0.3s ease;
+			border: 1px solid var(--border);
+			color: var(--foreground);
+		}
+
+		.modal.active .modal-content {
+			transform: translateY(0);
+		}
+
+		.modal-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 1.5rem;
+			border-bottom: 1px solid var(--border);
+			padding-bottom: 1rem;
+		}
+
+		.modal-title {
+			font-size: 1.4rem;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			color: var(--foreground);
+		}
+
+		.close-btn {
+			background: none;
+			border: none;
+			font-size: 1.8rem;
+			cursor: pointer;
+			color: var(--muted-foreground);
+			padding: 0.25rem;
+			border-radius: 0.375rem;
+			transition: var(--transition);
+		}
+
+		.close-btn:hover {
+			background: var(--accent);
+			color: var(--foreground);
+		}
+
+		.form-group {
+			margin-bottom: 1.2rem;
+		}
+
+		.form-label {
+			display: block;
+			margin-bottom: 0.6rem;
+			font-weight: 500;
+			color: var(--muted-foreground);
+			font-size: 0.9rem;
+		}
+
+		.form-input,
+		.form-textarea,
+		.form-select {
+			width: 100%;
+			padding: 0.85rem;
+			border: 1px solid var(--border);
+			border-radius: 0.5rem;
+			font-size: 0.9rem;
+			transition: var(--transition);
+			background: var(--muted);
+			color: var(--foreground);
+		}
+
+		.form-input:focus,
+		.form-textarea:focus,
+		.form-select:focus {
+			outline: none;
+			border-color: var(--primary);
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+		}
+
+		.form-textarea {
+			resize: vertical;
+			min-height: 5rem;
+		}
+
+		.time-inputs {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 1.2rem;
+		}
+
+		.modal-actions {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-top: 2rem;
+			padding-top: 1.2rem;
+			border-top: 1px solid var(--border);
+		}
+
+		.btn-danger {
+			background: #dc3545;
+			color: white;
+			border-color: #dc3545;
+		}
+
+		.btn-danger:hover {
+			background: #c82333;
+			border-color: #bd2130;
+		}
+
+		.category-indicator {
+			display: inline-block;
+			width: 14px;
+			height: 14px;
+			border-radius: 50%;
+			margin-right: 0.6rem;
+			vertical-align: middle;
+		}
+
+		.date-info {
+			background: var(--muted);
+			padding: 0.8rem;
+			border-radius: 0.5rem;
+			margin-bottom: 1.2rem;
+			font-size: 0.9rem;
+			color: var(--muted-foreground);
+			text-align: center;
+		}
+
+		/* Custom Alert Modal Styling */
+		#alertDialog .modal-content {
+			max-width: 30vw;
+			/* Converted from 400px to vw */
+			padding: 1.5rem;
+		}
+
+		#alertDialog .modal-title {
+			font-size: 1.2rem;
+			color: #dc3545;
+		}
+
+		#alertDialog .modal-body {
+			margin-bottom: 1.5rem;
+			color: var(--foreground);
+		}
+
+		#alertDialog .modal-actions {
+			justify-content: flex-end;
+			border-top: none;
+			padding-top: 0;
+		}
+
+		/* Chatbot Modal Specific Styles */
+		#chatbotModal .modal-content {
+			max-width: 45vw;
+			/* Converted from 600px to vw */
+			height: 80vh;
+			display: flex;
+			flex-direction: column;
+		}
+
+		#chatHistory {
+			flex-grow: 1;
+			overflow-y: auto;
+			border: 1px solid var(--border);
+			border-radius: 0.5rem;
+			padding: 1rem;
+			margin-bottom: 1rem;
+			background: var(--muted);
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+
+		.chat-message {
+			padding: 0.6rem 0.8rem;
+			border-radius: 0.75rem;
+			max-width: 80%;
+			word-wrap: break-word;
+			font-size: 0.9rem;
+		}
+
+		.chat-message.user {
+			background-color: var(--primary);
+			color: white;
+			align-self: flex-end;
+			border-bottom-right-radius: 0;
+		}
+
+		.chat-message.bot {
+			background-color: var(--card);
+			color: var(--foreground);
+			align-self: flex-start;
+			border: 1px solid var(--border);
+			border-bottom-left-radius: 0;
+		}
+
+		.chat-input-container {
+			display: flex;
+			gap: 0.5rem;
+		}
+
+		#chatInput {
+			flex-grow: 1;
+			padding: 0.85rem;
+			border-radius: 0.5rem;
+			border: 1px solid var(--border);
+			font-size: 0.9rem;
+		}
+
+		#chatInput:focus {
+			outline: none;
+			border-color: var(--primary);
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+		}
+
+		/* New Chatbot Button Position */
+		#openChatbotBtn {
+			position: fixed;
+			bottom: 20px;
+			/* Kept px for fixed positioning from viewport edge */
+			right: 20px;
+			/* Kept px for fixed positioning from viewport edge */
+			z-index: 90;
+			box-shadow: var(--shadow-lg);
+			border-radius: 50%;
+			width: 4vw;
+			/* Converted from 60px to vw */
+			height: 4vw;
+			/* Converted from 60px to vw */
+			max-width: 60px;
+			/* Max size to prevent huge button on very large screens */
+			max-height: 60px;
+			/* Max size to prevent huge button on very large screens */
+			font-size: 1.8rem;
+			background-color: var(--primary);
+			color: white;
+			border: none;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+		}
+
+		#openChatbotBtn:hover {
+			transform: scale(1.1);
+			box-shadow: 0 15px 20px rgba(0, 0, 0, 0.2);
+		}
+
+		/* Event Details Modal */
+		#eventDetailsModal .modal-content {
+			max-width: 35vw;
+			/* Converted from 450px to vw */
+			padding: 1.5rem;
+		}
+
+		#eventDetailsModal .modal-body {
+			margin-bottom: 1.5rem;
+			color: var(--foreground);
+		}
+
+		#eventDetailsModal .detail-item {
+			margin-bottom: 0.8rem;
+		}
+
+		#eventDetailsModal .detail-label {
+			font-weight: 600;
+			color: var(--muted-foreground);
+			font-size: 0.85rem;
+			display: block;
+			margin-bottom: 0.2rem;
+		}
+
+		#eventDetailsModal .detail-value {
+			font-size: 1rem;
+			color: var(--foreground);
+		}
+
+		#eventDetailsModal .modal-actions {
+			justify-content: space-between;
+		}
+
+
+		@media (max-width: 768px) {
+			.header {
+				flex-direction: column;
+				gap: 1rem;
+				padding: 1rem;
+				align-items: flex-start;
+			}
+
+			.header-left {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 0.5rem;
+				width: 100%;
+			}
+
+			.nav-controls {
+				width: 100%;
+				justify-content: center;
+			}
+
+			.current-date {
+				font-size: 1.1rem;
+			}
+
+			.time-grid {
+				font-size: 0.75rem;
+			}
+
+			.modal-content {
+				margin: 1rem;
+				width: calc(100% - 2rem);
+				padding: 1.2rem;
+			}
+
+			.modal-title {
+				font-size: 1.2rem;
+			}
+
+			.btn {
+				padding: 0.5rem 1rem;
+				font-size: 0.85rem;
+			}
+
+			.btn-icon {
+				width: 6vw;
+				/* Adjusted for mobile */
+				height: 6vw;
+				/* Adjusted for mobile */
+				max-width: 2.5rem;
+				/* Still cap at original rem size */
+				max-height: 2.5rem;
+				/* Still cap at original rem size */
+				font-size: 1rem;
+			}
+
+			.all-day-label {
+				width: 60px;
+				/* Kept px for time column structure */
+				min-width: 60px;
+				/* Kept px for time column structure */
+			}
+
+			.time-slot {
+				font-size: 0.65rem;
+				width: 60px;
+				/* Kept px for time column structure */
+				min-width: 60px;
+				/* Kept px for time column structure */
+			}
+
+			#openChatbotBtn {
+				width: 8vw;
+				/* Adjusted for mobile */
+				height: 8vw;
+				/* Adjusted for mobile */
+				max-width: 50px;
+				/* Max size to prevent huge button on very large screens */
+				max-height: 50px;
+				/* Max size to prevent huge button on very large screens */
+				font-size: 1.5rem;
+				bottom: 15px;
+				/* Kept px for fixed positioning from viewport edge */
+				right: 15px;
+				/* Kept px for fixed positioning from viewport edge */
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="calendar-container">
+		<header class="header">
+			<div class="header-left">
+				<div class="logo">📅 Smart Calendar</div>
+				<div class="nav-controls">
+					<button class="btn btn-icon" aria-label="Previous day" onclick="previousDay()">‹</button>
+					<button class="btn btn-icon" aria-label="Next day" onclick="nextDay()">›</button>
+					<button class="btn" onclick="goToToday()">Today</button>
+				</div>
+			</div>
+			<div class="header-right">
+				<div class="current-date" id="currentDayDate"></div>
+				<button class="btn btn-primary" onclick="openModal()">+ New Event</button>
+			</div>
+		</header>
+
+		<div class="all-day-container" id="allDayContainer" style="display:none;">
+			<div class="all-day-label">All-day</div>
+			<div class="all-day-events" id="allDayEvents"></div>
+		</div>
+
+		<div class="calendar-grid">
+			<div class="days-header" id="daysHeader"></div>
+			<div class="time-grid" id="timeGrid">
+				<!-- Current time indicator line -->
+				<div class="current-time-line" id="currentTimeLine"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title" id="modalTitle">📅 New Event</h3>
+				<button class="close-btn" aria-label="Close modal" onclick="closeModal()">×</button>
+			</div>
+
+			<form id="eventForm">
+				<div class="form-group">
+					<label class="form-label" for="eventTitle">Event Title</label>
+					<input type="text" class="form-input" id="eventTitle" placeholder="Enter event title" required />
+				</div>
+
+				<div class="form-group">
+					<label class="form-label" for="eventDescription">Description</label>
+					<textarea class="form-textarea" id="eventDescription"
+						placeholder="Add event description (optional)"></textarea>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label" for="eventCategory">Category</label>
+					<select class="form-select" id="eventCategory">
+						<option value="work">🏢 Work</option>
+						<option value="personal">👤 Personal</option>
+						<option value="family">👨‍👩‍👧‍👦 Family</option>
+						<option value="health">🏥 Health</option>
+						<option value="education">🎓 Education</option>
+						<option value="social">🎉 Social</option>
+						<option value="holiday">🏖️ Holiday</option>
+						<option value="other">💡 Other</option>
+					</select>
+				</div>
+
+				<div class="time-inputs">
+					<div class="form-group">
+						<label class="form-label" for="startTime">Start Time</label>
+						<input type="time" class="form-input" id="startTime" required />
+					</div>
+					<div class="form-group">
+						<label class="form-label" for="endTime">End Time</label>
+						<input type="time" class="form-input" id="endTime" required />
+					</div>
+				</div>
+
+				<div class="date-info" id="dateInfo"></div>
+
+				<div class="modal-actions">
+					<div>
+						<button type="button" class="btn btn-danger" id="deleteBtn" onclick="deleteEvent()"
+							style="display: none;">
+							🗑️ Delete
+						</button>
+					</div>
+					<div style="display: flex; gap: 0.5rem;">
+						<button type="button" class="btn" onclick="closeModal()">Cancel</button>
+						<button type="submit" class="btn btn-primary" id="submitBtn">Create Event</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Custom Alert Modal -->
+	<div class="modal" id="alertDialog" role="alertdialog" aria-labelledby="alertTitle">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title" id="alertTitle"></h3>
+				<button class="close-btn" aria-label="Close alert" onclick="closeAlert()">×</button>
+			</div>
+			<div class="modal-body" id="alertMessage"></div>
+			<div class="modal-actions" style="justify-content: flex-end;">
+				<button class="btn btn-primary" onclick="closeAlert()">OK</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Chatbot Modal -->
+	<div class="modal" id="chatbotModal" role="dialog" aria-modal="true" aria-labelledby="chatbotTitle">
+		<div class="modal-content" id="chatbotModalContent">
+			<div class="modal-header" id="chatbotModalHeader">
+				<h3 class="modal-title" id="chatbotTitle">💬 Calendar Chatbot</h3>
+				<button class="close-btn" aria-label="Close chatbot" onclick="closeChatbotModal()">×</button>
+			</div>
+			<div id="chatHistory">
+				<!-- Chat messages will be appended here -->
+				<div class="chat-message bot">Hello! I'm your calendar assistant. How can I help you today?</div>
+			</div>
+			<div class="chat-input-container">
+				<input type="text" class="form-input" id="chatInput" placeholder="Ask me about your calendar..." />
+				<button class="btn btn-primary" onclick="sendChatMessage()">Send</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- New Event Details Modal -->
+	<div class="modal" id="eventDetailsModal" role="dialog" aria-modal="true" aria-labelledby="eventDetailsTitle">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title" id="eventDetailsTitle">Event Details</h3>
+				<button class="close-btn" aria-label="Close event details" onclick="closeEventDetailsModal()">×</button>
+			</div>
+			<div class="modal-body">
+				<div class="detail-item">
+					<span class="detail-label">Title:</span>
+					<span class="detail-value" id="detailTitle"></span>
+				</div>
+				<div class="detail-item">
+					<span class="detail-label">Description:</span>
+					<span class="detail-value" id="detailDescription"></span>
+				</div>
+				<div class="detail-item">
+					<span class="detail-label">Category:</span>
+					<span class="detail-value" id="detailCategory"></span>
+				</div>
+				<div class="detail-item">
+					<span class="detail-label">Time:</span>
+					<span class="detail-value" id="detailTime"></span>
+				</div>
+				<div class="detail-item">
+					<span class="detail-label">Date:</span>
+					<span class="detail-value" id="detailDate"></span>
+				</div>
+				<div class="detail-item" id="detailLinkContainer" style="display:none;">
+					<span class="detail-label">Link:</span>
+					<a href="#" target="_blank" class="detail-value" id="detailLink"></a>
+				</div>
+			</div>
+			<div class="modal-actions">
+				<div>
+					<button type="button" class="btn btn-danger" id="detailDeleteBtn">🗑️ Delete</button>
+				</div>
+				<div style="display: flex; gap: 0.5rem;">
+					<button type="button" class="btn btn-primary" id="detailEditBtn">✏️ Edit</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Chatbot Button -->
+	<button class="btn btn-icon" id="openChatbotBtn" aria-label="Open Chatbot" onclick="openChatbotModal()">💬</button>
+
+
+	<script>
+		// Calendar state
+		let currentDate = new Date();
+		console.log("Initial currentDate:", currentDate);
+		let events = []; // Will be populated from backend
+		let editingEventId = null;
+		let currentUserId = 0; // IMPORTANT: In a real application, this should be dynamically set after user login.
+		// For testing, you can change this to 0 or 1 based on the example users in server.js
+
+		// DOM references
+		const currentDayDate = document.getElementById("currentDayDate");
+		const daysHeader = document.getElementById("daysHeader");
+		const timeGrid = document.getElementById("timeGrid");
+		const eventModal = document.getElementById("eventModal");
+		const eventForm = document.getElementById("eventForm");
+		const eventTitleInput = document.getElementById("eventTitle");
+		const eventDescriptionInput = document.getElementById("eventDescription");
+		const eventCategoryInput = document.getElementById("eventCategory");
+		const startTimeInput = document.getElementById("startTime");
+		const endTimeInput = document.getElementById("endTime");
+		const deleteBtn = document.getElementById("deleteBtn");
+		const dateInfo = document.getElementById("dateInfo");
+		const allDayContainer = document.getElementById("allDayContainer");
+		const allDayEvents = document.getElementById("allDayEvents");
+		const currentTimeLine = document.getElementById("currentTimeLine");
+
+		// Custom Alert DOM references
+		const alertDialog = document.getElementById("alertDialog");
+		const alertTitle = document.getElementById("alertTitle");
+		const alertMessage = document.getElementById("alertMessage");
+
+		// Chatbot DOM references
+		const chatbotModal = document.getElementById("chatbotModal");
+		const chatbotModalContent = document.getElementById("chatbotModalContent");
+		const chatbotModalHeader = document.getElementById("chatbotModalHeader");
+		const chatHistory = document.getElementById("chatHistory");
+		const chatInput = document.getElementById("chatInput");
+		const openChatbotBtn = document.getElementById("openChatbotBtn"); // New reference
+
+		// Event Details Modal DOM references
+		const eventDetailsModal = document.getElementById("eventDetailsModal");
+		const detailTitle = document.getElementById("detailTitle");
+		const detailDescription = document.getElementById("detailDescription");
+		const detailCategory = document.getElementById("detailCategory");
+		const detailTime = document.getElementById("detailTime");
+		const detailDate = document.getElementById("detailDate");
+		const detailLinkContainer = document.getElementById("detailLinkContainer"); // New
+		const detailLink = document.getElementById("detailLink"); // New
+		const detailEditBtn = document.getElementById("detailEditBtn");
+		const detailDeleteBtn = document.getElementById("detailDeleteBtn");
+
+		// Drag state for chatbot modal
+		let isChatbotDragging = false;
+		let chatbotOffsetX, chatbotOffsetY;
+
+
+		// Utils
+		function formatDate(date)
+		{
+			if (!(date instanceof Date) || isNaN(date))
+			{
+				console.error("formatDate received invalid date:", date);
+				return "Invalid Date";
+			}
+			return date.toLocaleDateString(undefined, {
+				weekday: "long",
+				month: "long",
+				day: "numeric",
+				year: "numeric",
+			});
+		}
+		// Formats a date range for the header (e.g., "Mon, Jul 8 - Sun, Jul 14")
+		function formatWeekRange(date)
+		{
+			if (!(date instanceof Date) || isNaN(date))
+			{
+				console.error("formatWeekRange received invalid date:", date);
+				return "Invalid Date Range";
+			}
+			const startOfWeek = getWeekStart(date);
+			const endOfWeek = new Date(startOfWeek);
+			endOfWeek.setDate(startOfWeek.getDate() + 6); // 6 days after Monday is Sunday
+
+			const startDay = startOfWeek.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+			const endDay = endOfWeek.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+
+			return `${startDay} - ${endDay}`;
+		}
+
+		function padZero(num)
+		{
+			return num.toString().padStart(2, "0");
+		}
+		// Format time to 12-hour with AM/PM
+		function formatTime(date)
+		{
+			if (!(date instanceof Date) || isNaN(date))
+			{
+				console.error("formatTime received invalid date:", date);
+				return "Invalid Time";
+			}
+			return date.toLocaleTimeString(undefined, {
+				hour: "2-digit",
+				minute: "2-digit",
+				hour12: true, // Use 12-hour format
+			});
+		}
+
+		function clearChildren(el)
+		{
+			while (el.firstChild)
+			{
+				el.removeChild(el.firstChild);
+			}
+		}
+
+		// Function to generate a random, bright hex color
+		function getRandomColor()
+		{
+			const hue = Math.floor(Math.random() * 360); // 0-359
+			const saturation = Math.floor(Math.random() * (90 - 70) + 70); // 70-90% saturation
+			const lightness = Math.floor(Math.random() * (70 - 50) + 50); // 50-70% lightness
+			return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+		}
+
+		// Function to determine contrast text color (black or white) based on background color
+		function getContrastTextColor(hexColor)
+		{
+			// Convert HSL to RGB first if it's HSL
+			let r, g, b;
+			if (hexColor.startsWith('hsl'))
+			{
+				const hsl = hexColor.match(/\d+/g).map(Number);
+				const h = hsl[0];
+				const s = hsl[1] / 100;
+				const l = hsl[2] / 100;
+
+				const c = (1 - Math.abs(2 * l - 1)) * s;
+				const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+				const m = l - c / 2;
+
+				if (0 <= h && h < 60)
+				{
+					r = c; g = x; b = 0;
+				} else if (60 <= h && h < 120)
+				{
+					r = x; g = c; b = 0;
+				} else if (120 <= h && h < 180)
+				{
+					r = 0; g = c; b = x;
+				} else if (180 <= h && h < 240)
+				{
+					r = 0; g = x; b = c;
+				} else if (240 <= h && h < 300)
+				{
+					r = x; g = 0; b = c;
+				} else
+				{
+					r = c; g = 0; b = x;
+				}
+				r = Math.round((r + m) * 255);
+				g = Math.round((g + m) * 255);
+				b = Math.round((b + m) * 255);
+			} else
+			{
+				// Assumes hex format like #RRGGBB or RGB(R,G,B)
+				let color = hexColor;
+				if (color.startsWith('#'))
+				{
+					color = color.slice(1);
+				}
+				if (color.startsWith('rgb'))
+				{
+					const rgbMatch = color.match(/\d+/g);
+					r = parseInt(rgbMatch[0]);
+					g = parseInt(rgbMatch[1]);
+					b = parseInt(rgbMatch[2]);
+				} else
+				{
+					// Assume hex without #
+					r = parseInt(color.substring(0, 2), 16);
+					g = parseInt(color.substring(2, 4), 16);
+					b = parseInt(color.substring(4, 6), 16);
+				}
+			}
+
+			// Calculate luminance (YIQ formula)
+			const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+			return luminance > 0.5 ? 'black' : 'white'; // Use black for light colors, white for dark
+		}
+
+
+		// Custom Alert Functions
+		function showAlert(title, message)
+		{
+			alertTitle.textContent = title;
+			alertMessage.textContent = message;
+			alertDialog.classList.add("active");
+		}
+
+		function closeAlert()
+		{
+			alertDialog.classList.remove("active");
+		}
+
+		// Display current day date or week range
+		function updateHeaderDate()
+		{
+			console.log("Updating header date. CurrentDate:", currentDate);
+			currentDayDate.textContent = formatWeekRange(currentDate); // Show week range
+		}
+
+		// Render time slots (half-hour increments for better granularity)
+		function renderTimeGrid()
+		{
+			console.log("Rendering time grid. CurrentDate:", currentDate);
+			clearChildren(daysHeader);
+			// Keep timeGrid children for events, but clear hour-slots for re-rendering
+			const existingEvents = timeGrid.querySelectorAll(".event");
+			const existingTimeLine = timeGrid.querySelector(".current-time-line");
+			clearChildren(timeGrid);
+			if (existingTimeLine) timeGrid.appendChild(existingTimeLine); // Re-add time line
+
+			// Header row (Time label + day label)
+			const timeHeader = document.createElement("div");
+			timeHeader.className = "day-header";
+			timeHeader.textContent = ""; // Empty for time column header
+			daysHeader.appendChild(timeHeader);
+			console.log("Added empty time header.");
+
+			const dayHeader = document.createElement("div");
+			dayHeader.className = "day-header";
+			dayHeader.textContent = formatDate(currentDate).split(',')[0]; // Just day of week
+			if (currentDate.toDateString() === new Date().toDateString())
+			{
+				dayHeader.classList.add("today");
+			}
+			daysHeader.appendChild(dayHeader);
+			console.log("Added day header:", dayHeader.textContent);
+
+
+			// Time column (5:00 AM to 4:30 AM next day, covering 23 hours)
+			// We'll render 23 hours * 2 slots/hour = 46 slots for the main grid.
+			// The hours will wrap around midnight.
+			const startHour = 8; // Start from 8:00 AM
+			const totalHours = 16; // Show 16 hours (8 AM to midnight, adjust as needed)
+			const pxPerHalfHour = 36;
+
+			for (let i = 0; i < totalHours * 2; i++) { // 32 half-hour slots for 16 hours
+				let hour = startHour + Math.floor(i / 2);
+				const minute = i % 2 === 0 ? "00" : "30";
+
+				// Convert 24-hour format to 12-hour format for display
+				let displayHour = hour % 12;
+				if (displayHour === 0) displayHour = 12; // 00:xx becomes 12 AM, 12:xx becomes 12 PM
+				const ampm = hour < 12 ? "AM" : "PM";
+
+				const timeSlot = document.createElement("div");
+				timeSlot.className = "time-slot " + (minute === "30" ? "half" : "");
+				if (minute === "00")
+				{
+					timeSlot.textContent = `${displayHour}${ampm}`;
+				}
+				timeGrid.appendChild(timeSlot);
+				// console.log(`Appended timeSlot for ${displayHour}:${minute} ${ampm}`);
+
+
+				const daySlot = document.createElement("div");
+				daySlot.className = "hour-slot";
+				if (currentDate.toDateString() === new Date().toDateString())
+				{
+					daySlot.classList.add("today"); // Highlight today's slots
+				}
+				daySlot.dataset.hour = hour;
+				daySlot.dataset.minute = minute;
+				daySlot.title = `Add event at ${displayHour}:${minute} ${ampm}`;
+				daySlot.addEventListener("click", () =>
+				{
+					openModal(null, new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hour, minute === "30" ? 30 : 0));
+				});
+				timeGrid.appendChild(daySlot);
+				// console.log(`Appended daySlot for ${displayHour}:${minute} ${ampm}`);
+			}
+
+			// Scroll to 5 AM position (which is 5 hours * 2 slots/hour * 36px/slot = 360px)
+			const scrollTargetMinutes = displayStartHour * 60;
+			const scrollPos = (scrollTargetMinutes / 30) * pxPerHalfHour;
+			timeGrid.scrollTo({ top: scrollPos, behavior: "instant" }); // or "smooth"
+			console.log("Time grid rendered and scrolled to 5 AM. Scroll position:", scrollPos);
+		}
+
+		// Update current time line position
+		function updateCurrentTimeLine()
+		{
+			const now = new Date();
+			// Only show the line if the current date is today
+			if (currentDate.toDateString() === now.toDateString())
+			{
+				const minutesSinceMidnight = now.getHours() * 60 + now.getMinutes();
+				const pxPerMinute = 36 / 30; // 36px per half-hour, so 36/30 px per minute
+				const topPosition = (minutesSinceMidnight * pxPerMinute); // Position from midnight
+				currentTimeLine.style.top = `${topPosition}px`;
+				currentTimeLine.style.display = 'block';
+				console.log("Current time line updated. Top:", topPosition);
+			} else
+			{
+				currentTimeLine.style.display = 'none';
+				console.log("Current time line hidden (not today).");
+			}
+		}
+
+		// Filter events for the current day
+		function getEventsForDay(date)
+		{
+			console.log("Getting events for day:", date.toDateString());
+			const dayStart = new Date(date);
+			dayStart.setHours(0, 0, 0, 0);
+			const dayEnd = new Date(dayStart);
+			dayEnd.setHours(23, 59, 59, 999);
+
+			const filteredEvents = events.filter(
+				(event) =>
+				{
+					// Ensure event.startTime and event.endTime are valid Date objects
+					if (!(event.startTime instanceof Date) || isNaN(event.startTime) ||
+						!(event.endTime instanceof Date) || isNaN(event.endTime))
+					{
+						console.warn("Skipping event due to invalid date objects:", event);
+						return false;
+					}
+
+					// Check if event starts on this day
+					const startsOnThisDay = event.startTime.toDateString() === date.toDateString();
+					// Check if event ends on this day
+					const endsOnThisDay = event.endTime.toDateString() === date.toDateString();
+					// Check if event spans across this day (starts before, ends after)
+					const spansThisDay = event.startTime < dayEnd && event.endTime > dayStart;
+
+					return startsOnThisDay || endsOnThisDay || spansThisDay;
+				}
+			);
+			console.log("Filtered events for day:", filteredEvents.length);
+			return filteredEvents;
+		}
+
+		// Separate all-day events from timed events
+		function splitEvents(eventsForDay)
+		{
+			console.log("Splitting events. Total for day:", eventsForDay.length);
+			const allDayEvents = [];
+			const timedEvents = [];
+			for (const ev of eventsForDay)
+			{
+				// An event is considered all-day if it's marked as such, or if it spans the entire day from 00:00 to 23:59
+				const isFullDaySpan = ev.startTime.getHours() === 0 && ev.startTime.getMinutes() === 0 &&
+					ev.endTime.getHours() === 23 && ev.endTime.getMinutes() === 59;
+
+				// Refined logic for all-day: only if explicitly marked or spans exact full day
+				if (ev.allDay || isFullDaySpan)
+				{
+					allDayEvents.push(ev);
+				} else
+				{
+					timedEvents.push(ev);
+				}
+			}
+			console.log("All-day events:", allDayEvents.length, "Timed events:", timedEvents.length);
+			return { allDayEvents, timedEvents };
+		}
+
+		// Render all-day events at top
+		function renderAllDayEvents(allDayEventsList)
+		{
+			console.log("Rendering all-day events. List count:", allDayEventsList.length);
+			clearChildren(allDayEvents);
+			if (allDayEventsList.length === 0)
+			{
+				allDayContainer.style.display = "none";
+				console.log("No all-day events, container hidden.");
+				return;
+			}
+			allDayContainer.style.display = "flex";
+
+			allDayEventsList.forEach((event) =>
+			{
+				const evEl = document.createElement("div");
+				evEl.className = `event-all-day`; // Removed category class
+				evEl.style.backgroundColor = event.color; // Use assigned random color
+				evEl.style.color = getContrastTextColor(event.color); // Set text color dynamically
+				evEl.textContent = event.title;
+				evEl.title = `${event.title}\n${event.description || ""}\n${formatTime(event.startTime)} - ${formatTime(event.endTime)}`; // Full details on hover
+				evEl.tabIndex = 0;
+				evEl.setAttribute("role", "button");
+				evEl.addEventListener("click", () => openEventDetailsModal(event.id)); // Open details modal
+				allDayEvents.appendChild(evEl);
+				console.log("Appended all-day event:", event.title);
+			});
+			console.log("All-day events rendered.");
+		}
+
+		// Calculate overlapping groups for timed events (NO LONGER USED FOR POSITIONING, ONLY FOR SORTING)
+		function calculateOverlaps(timedEvents)
+		{
+			// Sort events by start time
+			const sorted = timedEvents.slice().sort((a, b) => a.startTime - b.startTime);
+			// For single column display, we don't need to group them for horizontal positioning.
+			// We just need them sorted so later events appear on top if they overlap.
+			return [sorted]; // Return as a single group
+		}
+
+		// Render timed events with single-column stacking for overlaps
+		function renderTimedEvents(timedEvents)
+		{
+			console.log("Rendering timed events. List count:", timedEvents.length);
+			// Remove existing event elements before re-rendering
+			const existingEvents = timeGrid.querySelectorAll(".event");
+			existingEvents.forEach((ev) => ev.remove());
+			console.log("Cleared existing timed events.");
+
+			if (timedEvents.length === 0) return;
+
+			const overlaps = calculateOverlaps(timedEvents); // This will now return one group with all sorted events
+
+			// Define the visible time range in minutes from midnight
+			const displayStartHour = 5; // Calendar display starts at 5 AM
+			const displayTotalMinutesStart = displayStartHour * 60; // 480 minutes
+			const pxPerMinute = 36 / 30; // 36px per half-hour
+
+			// Iterate through the single group of sorted events
+			overlaps[0].forEach((event, index) =>
+			{
+				console.log("Processing timed event:", event.title, "ID:", event.id);
+				// Define the 24-hour period for the current displayed day
+				const currentDayStart = new Date(currentDate);
+				currentDayStart.setHours(0, 0, 0, 0);
+				const currentDayEnd = new Date(currentDate);
+				currentDayEnd.setHours(23, 59, 59, 999);
+
+				// Calculate the intersection of the event's time range with the current day's 24-hour period
+				const intersectionStartMs = Math.max(event.startTime.getTime(), currentDayStart.getTime());
+				const intersectionEndMs = Math.min(event.endTime.getTime(), currentDayEnd.getTime());
+
+				// If there's no valid intersection, skip rendering this event on this day's column
+				if (intersectionStartMs >= intersectionEndMs)
+				{
+					console.log("Skipping event due to no valid intersection:", event.title);
+					return;
+				}
+
+				const intersectionStartDate = new Date(intersectionStartMs);
+				const intersectionEndDate = new Date(intersectionEndMs);
+
+				// Calculate minutes from midnight for the intersection segment
+				let segmentStartMinutesFromMidnight = (intersectionStartDate.getHours() * 60) + intersectionStartDate.getMinutes();
+				let segmentEndMinutesFromMidnight = (intersectionEndDate.getHours() * 60) + intersectionEndDate.getMinutes();
+
+				// Calculate top relative to the *visual start* of the calendar (5 AM)
+				let currentTop = ((segmentStartMinutesFromMidnight - displayTotalMinutesStart) * pxPerMinute);
+				let currentHeight = ((segmentEndMinutesFromMidnight - segmentStartMinutesFromMidnight) * pxPerMinute);
+
+				// Clamp top and height so events before 5 AM are not shown above the grid
+				if (currentTop < 0) {
+				    currentHeight += currentTop; // Reduce height by the amount above the grid
+				    currentTop = 0;
+				}
+				if (currentHeight < 0) {
+				    return; // Don't render if event is completely before 5 AM
+				}
+
+				// Ensure minimum height
+				const minHeight = '2.5rem'; /* Adjusted minimum height and kept rem */
+				// Convert minHeight from rem to px for comparison with currentHeight (which is in px)
+				// This is a rough conversion, ideally we'd get computed style for a more accurate comparison.
+				const minHeightPx = parseFloat(getComputedStyle(document.documentElement).fontSize) * parseFloat(minHeight);
+
+				if (currentHeight < minHeightPx)
+				{
+					currentHeight = minHeightPx;
+				}
+
+				// Final check for valid height
+				if (currentHeight <= 0)
+				{
+					console.log("Skipping event due to invalid height:", event.title, "Height:", currentHeight);
+					return; // Do not render if height is invalid
+				}
+				console.log(`Event ${event.title}: Calculated Top=${currentTop}px, Height=${currentHeight}px`);
+
+
+				// Create event element
+				const evEl = document.createElement("div");
+				evEl.className = `event`; // This class now has the fixed width/left for single column
+				evEl.style.backgroundColor = event.color; // Use assigned random color
+				evEl.style.color = getContrastTextColor(event.color); // Set text color dynamically
+				evEl.style.top = currentTop + "px";
+				evEl.style.height = currentHeight + "px";
+				// No need for widthPercent/leftPercent, handled by CSS for .event
+
+				// Add inner elements for title, time, and description
+				const titleEl = document.createElement("div");
+				titleEl.className = "event-title";
+				titleEl.textContent = event.title;
+				evEl.appendChild(titleEl);
+
+				const timeEl = document.createElement("div");
+				timeEl.className = "event-time-display";
+				timeEl.textContent = `${formatTime(event.startTime)} - ${formatTime(event.endTime)}`;
+				evEl.appendChild(timeEl);
+
+				if (event.description)
+				{
+					const descEl = document.createElement("div");
+					descEl.className = "event-description-display";
+					descEl.textContent = event.description;
+					evEl.appendChild(descEl);
+				}
+
+				evEl.title = `${event.title}\n${event.description || ""}\n${formatTime(event.startTime)} - ${formatTime(event.endTime)}`; // Full details on hover
+				evEl.tabIndex = 0;
+				evEl.setAttribute("role", "button");
+				evEl.addEventListener("click", () => openEventDetailsModal(event.id)); // Open details modal
+
+				// Add drag handlers only if it's not a Gemini-generated event
+				if (!event.isGeminiGenerated)
+				{
+					addDragHandlers(evEl, event);
+				}
+				timeGrid.appendChild(evEl);
+				console.log("Event appended:", event.title);
+			});
+			console.log("Timed events rendered.");
+		}
+
+		// Add drag support to event elements
+		function addDragHandlers(element, event)
+		{
+			let startY = 0;
+			let startTop = 0;
+			let isDragging = false;
+
+			function onPointerDown(e)
+			{
+				e.preventDefault();
+				e.stopPropagation(); // Prevent click event from firing immediately
+				// Only allow dragging if not a Gemini-generated event
+				const eventData = events.find(ev => ev.id === event.id);
+				if (eventData && eventData.isGeminiGenerated)
+				{
+					showAlert("Cannot Edit", "Gemini-generated events cannot be directly dragged. Please create a new event if you wish to override.");
+					return;
+				}
+
+				startY = e.clientY || e.touches?.[0].clientY;
+				startTop = parseFloat(element.style.top);
+				isDragging = true;
+				element.style.transition = "none"; // Disable transition during drag
+				element.style.zIndex = "100"; // Bring to front during drag
+				window.addEventListener("pointermove", onPointerMove);
+				window.addEventListener("pointerup", onPointerUp);
+				window.addEventListener("pointercancel", onPointerUp);
+			}
+
+			function onPointerMove(e)
+			{
+				if (!isDragging) return;
+				const currentY = e.clientY || e.touches?.[0].clientY;
+				const dy = currentY - startY;
+				let newTop = startTop + dy;
+
+				// Clamp newTop to calendar grid bounds (min 1px, max container height - event height)
+				// The grid represents 24 hours (48 half-hour slots * 36px/slot = 1728px)
+				const maxTop = (24 * 60 / 30) * 36 - parseFloat(element.style.height); // Adjusted maxTop for 36px height
+				newTop = Math.max(0, Math.min(newTop, maxTop)); // Adjusted minTop to 0
+
+				element.style.top = newTop + "px";
+			}
+
+			function onPointerUp(e)
+			{
+				if (!isDragging) return;
+				isDragging = false;
+				element.style.transition = ""; // Re-enable transition
+				element.style.zIndex = "5"; // Reset z-index
+				window.removeEventListener("pointermove", onPointerMove);
+				window.removeEventListener("pointerup", onPointerUp);
+				window.removeEventListener("pointercancel", onPointerUp);
+
+				// Calculate new time from newTop
+				const pxPerMinute = 36 / 30; // 36px per half-hour, so 36/30 px per minute
+				// Adjusted calculation to consider the 5 AM offset for display
+				const displayStartHour = 5;
+				const displayTotalMinutesStart = displayStartHour * 60;
+				let newStartMinutesFromMidnight = (parseFloat(element.style.top) / pxPerMinute) + displayTotalMinutesStart;
+				newStartMinutesFromMidnight = Math.round(newStartMinutesFromMidnight / 5) * 5; // snap to 5 minutes
+
+				// Calculate new start time
+				let newStartDate = new Date(currentDate); // Use current date for the event
+				newStartDate.setHours(Math.floor(newStartMinutesFromMidnight / 60), newStartMinutesFromMidnight % 60, 0, 0);
+
+				// Calculate new end time (keep original duration)
+				const originalDurationMinutes = (event.endTime - event.startTime) / 60000;
+				let newEndDate = new Date(newStartDate.getTime() + originalDurationMinutes * 60000);
+
+				// Update event times and mark as user-modified
+				event.startTime = newStartDate;
+				event.endTime = newEndDate;
+				event.isGeminiGenerated = false; // Mark as user-modified
+
+				// Save and re-render
+				saveEvents();
+				updateCalendar();
+			}
+
+			element.addEventListener("pointerdown", onPointerDown);
+		}
+
+		// Save events to backend
+		async function saveEvents()
+		{
+			console.log("Saving events...");
+			// Filter out Gemini-generated events, only save user-created/modified ones
+			const userOnlyEvents = events.filter(ev => !ev.isGeminiGenerated).map(ev => ({
+				id: ev.id,
+				title: ev.title,
+				description: ev.description,
+				category: ev.category,
+				startTime: ev.startTime.toISOString(), // Convert Date to ISO string for storage
+				endTime: ev.endTime.toISOString(),
+				allDay: ev.allDay,
+				color: ev.color, // Include the color when saving
+				link: ev.link || null // Include link
+				// Do not include isGeminiGenerated when saving to user_events
+			}));
+
+			try
+			{
+				const response = await fetch('/api/user-events', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ userId: currentUserId, events: userOnlyEvents }),
+				});
+				if (!response.ok)
+				{
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				console.log("User events saved successfully.");
+			} catch (error)
+			{
+				console.error("Failed to save events:", error);
+				showAlert("Save Error", "Failed to save your events. Please try again.");
+			}
+		}
+
+		// Load events from backend
+		async function loadEvents()
+		{
+			console.log("Loading events...");
+			try
+			{
+				const response = await fetch(`/api/user-events?userId=${currentUserId}`);
+				if (!response.ok)
+				{
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				const data = await response.json();
+				console.log("Raw events data from server:", data);
+
+				// Process Gemini-generated events
+				const geminiEvents = (data.gemini_schedule || []).map(ev =>
+				{
+					const today = new Date(currentDate);
+					// Get the current day of the week (0 for Sunday, 1 for Monday, ..., 6 for Saturday)
+					const currentDayOfWeekJS = today.getDay();
+					// Convert to Gemini's 0 (Monday) - 6 (Sunday) format
+					const currentDayOfWeekGemini = (currentDayOfWeekJS === 0) ? 6 : currentDayOfWeekJS - 1;
+
+					// Calculate the difference in days to align Gemini's schedule with the current week
+					let diffDays = ev.day - currentDayOfWeekGemini;
+
+					// We want to display the Gemini schedule for the *current* week, so we adjust the date.
+					// The `currentDate` is already set to a specific day within the week.
+					// We need to find the Monday of the `currentDate`'s week, and then apply `ev.day` offset from that Monday.
+
+					const startOfWeek = getWeekStart(currentDate); // Get the Monday of the current displayed week
+
+					const targetStartDate = new Date(startOfWeek);
+					targetStartDate.setDate(startOfWeek.getDate() + ev.day); // Add Gemini's day offset from Monday
+
+					const targetEndDate = new Date(targetStartDate); // Start with same date as start
+
+					// Parse time strings
+					const [startH, startM] = parseTime12Hour(ev.startTime);
+					const [endH, endM] = parseTime12Hour(ev.endTime);
+
+					targetStartDate.setHours(startH, startM, 0, 0);
+					targetEndDate.setHours(endH, endM, 0, 0);
+
+					// Adjust end date if it crosses midnight
+					if (targetEndDate <= targetStartDate && (endH * 60 + endM) < (startH * 60 + startM))
+					{
+						targetEndDate.setDate(targetEndDate.getDate() + 1);
+					}
+					console.log(`Gemini Event: ${ev.title}, Start: ${targetStartDate}, End: ${targetEndDate}`);
+
+					return {
+						id: `gemini-${ev.id}`, // Prefix to distinguish Gemini events
+						title: ev.title,
+						description: ev.notes || "",
+						startTime: targetStartDate,
+						endTime: targetEndDate,
+						category: ev.type,
+						allDay: isAllDayGeminiEvent(targetStartDate, targetEndDate, ev.allDay), // Pass parsed dates and original allDay flag
+						isGeminiGenerated: true,
+						color: ev.color || getRandomColor(), // Use Gemini's color or assign random
+						link: ev.link || null // Include link
+					};
+				});
+				console.log("Processed Gemini events:", geminiEvents.length);
+
+
+				// Process user-created events
+				const userEvents = (data.user_events || []).map(ev => ({
+					...ev,
+					startTime: new Date(ev.startTime), // Convert ISO string back to Date
+					endTime: new Date(ev.endTime),
+					isGeminiGenerated: false, // Ensure this is false for user events
+					color: ev.color || getRandomColor(), // Use existing color or assign new random
+					link: ev.link || null // Include link
+				}));
+				console.log("Processed user events:", userEvents.length);
+
+				// Combine events, user events override Gemini events with same ID (if any)
+				// This assumes user-created events will have distinct IDs (Date.now().toString())
+				// and Gemini events will have 'gemini-' prefix, so direct merge is fine.
+				events = [...geminiEvents, ...userEvents];
+
+				// Sort events by start time for consistent rendering
+				events.sort((a, b) => a.startTime - b.startTime);
+				console.log("Combined and sorted events:", events.length, events);
+
+			} catch (error)
+			{
+				console.error("Failed to load events:", error);
+				showAlert("Load Error", "Failed to load your calendar data. Please ensure the backend is running and you are logged in.");
+				events = []; // Fallback to empty events
+			}
+		}
+
+		// Helper to parse 12-hour time string (e.g., "08:30 AM")
+		function parseTime12Hour(timeString)
+		{
+			if (typeof timeString !== 'string' || !timeString.includes(':') || !timeString.includes('M'))
+			{
+				console.error("parseTime12Hour received invalid time string:", timeString);
+				// Fallback to a default or throw an error, depending on desired behavior
+				return [0, 0]; // Default to midnight
+			}
+			const [time, ampm] = timeString.split(' ');
+			let [hours, minutes] = time.split(':').map(Number);
+
+			if (ampm === 'PM' && hours !== 12)
+			{
+				hours += 12;
+			} else if (ampm === 'AM' && hours === 12)
+			{
+				hours = 0; // Midnight
+			}
+			return [hours, minutes]; // Return hours and minutes
+		}
+
+		// Helper to determine if a Gemini event is all-day
+		// Now accepts parsed start and end Date objects, and an optional allDay flag from Gemini
+		function isAllDayGeminiEvent(startDate, endDate, geminiAllDayFlag)
+		{
+			console.log(`Checking all-day for: ${startDate.toDateString()}, Gemini flag: ${geminiAllDayFlag}`);
+			// If Gemini explicitly marked it as allDay, trust that
+			if (geminiAllDayFlag === true) return true;
+
+			// Otherwise, check if it spans exactly from 00:00 to 23:59 on the same day
+			const isFullDaySpan = (startDate.getHours() === 0 && startDate.getMinutes() === 0 &&
+				endDate.getHours() === 23 && endDate.getMinutes() === 59 &&
+				startDate.toDateString() === endDate.toDateString());
+			console.log(`Is full day span: ${isFullDaySpan}`);
+			return isFullDaySpan;
+		}
+
+
+		// Get the Monday of the week for a given date
+		function getWeekStart(date) {
+    const d = new Date(date);
+    const day = d.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday (day 0) to be last day of prev week
+    d.setDate(diff);
+    d.setHours(0, 0, 0, 0); // Set to start of the day
+    return d;
+}
+		// Update whole calendar view
+		async function updateCalendar()
+		{
+			console.log("Starting updateCalendar...");
+			console.log("CurrentDate at start of updateCalendar:", currentDate);
+			await loadEvents(); // Load latest events from backend
+			updateHeaderDate();
+			renderTimeGrid();
+			updateCurrentTimeLine(); // Update line position on render
+
+			const eventsForDay = getEventsForDay(currentDate);
+const displayStartHour = getEarliestEventHour(eventsForDay);
+const displayTotalMinutesStart = displayStartHour * 60;
+			const { allDayEvents: allDayList, timedEvents } = splitEvents(eventsForDay);
+
+			renderAllDayEvents(allDayList);
+			renderTimedEvents(timedEvents);
+
+			// Scroll to 5 AM position
+			const minutesTo5AM = 5 * 60;
+			const scrollPos = (minutesTo5AM / 30) * 36; // Adjusted for 36px height
+			timeGrid.scrollTo({ top: scrollPos, behavior: "smooth" });
+			console.log("updateCalendar finished.");
+		}
+
+		// Navigation functions
+		function previousDay()
+		{
+			console.log("Navigating to previous day.");
+			const newDate = new Date(currentDate);
+			newDate.setDate(currentDate.getDate() - 1);
+			const weekStart = getWeekStart(currentDate);
+
+			// If navigating to a day before the current week's start, snap to the previous week's start
+			if (newDate.getTime() < weekStart.getTime())
+			{
+				newDate.setDate(weekStart.getDate() - 7); // Go to Monday of previous week
+			}
+			currentDate = newDate;
+			updateCalendar();
+		}
+		function nextDay()
+		{
+			console.log("Navigating to next day.");
+			const newDate = new Date(currentDate);
+			newDate.setDate(currentDate.getDate() + 1);
+			const weekStart = getWeekStart(currentDate);
+			const weekEnd = new Date(weekStart);
+			weekEnd.setDate(weekStart.getDate() + 6); // Sunday of current week
+
+			// If navigating to a day after the current week's end, snap to the next week's start
+			if (newDate.getTime() > weekEnd.getTime())
+		
+			{
+				newDate.setDate(weekStart.getDate() + 7); // Go to Monday of next week
+			}
+			currentDate = newDate;
+			updateCalendar();
+		}
+		function goToToday()
+		{
+			console.log("Navigating to today.");
+			currentDate = new Date();
+			currentDate.setHours(0, 0, 0, 0); // Ensure it's start of day
+			updateCalendar();
+		}
+
+		// Modal open/close
+		function openModal(eventId = null, defaultStart = null)
+		{
+			console.log("Opening event modal. Event ID:", eventId);
+			editingEventId = eventId;
+			deleteBtn.style.display = eventId ? "inline-block" : "none";
+			document.getElementById("modalTitle").textContent = eventId ? "Edit Event" : "New Event";
+			document.getElementById("submitBtn").textContent = eventId ? "Save Changes" : "Create Event";
+
+			if (eventId)
+			{
+				// Load event data into form
+				const ev = events.find((e) => e.id === eventId);
+				if (ev && ev.isGeminiGenerated)
+				{
+					showAlert("Cannot Edit", "Gemini-generated events cannot be directly dragged. Please create a new event if you wish to override.");
+					closeModal(); // Close the modal if it's a Gemini event
+					return;
+				}
+				if (ev)
+				{
+					eventTitleInput.value = ev.title;
+					eventDescriptionInput.value = ev.description || "";
+					eventCategoryInput.value = ev.category;
+					// Use 24-hour format for input type="time"
+					startTimeInput.value = ev.startTime.toTimeString().substring(0, 5);
+					endTimeInput.value = ev.endTime.toTimeString().substring(0, 5);
+					dateInfo.textContent = formatDate(ev.startTime);
+				} else
+				{
+					// This case should ideally not happen if eventId is valid
+					showAlert("Error", "Event not found for editing.");
+					closeModal();
+					return;
+				}
+			} else
+			{
+				eventTitleInput.value = "";
+				eventDescriptionInput.value = "";
+				eventCategoryInput.value = "work";
+
+				if (defaultStart)
+				{
+					// Use 24-hour format for input type="time"
+					startTimeInput.value = padZero(defaultStart.getHours()) + ":" + padZero(defaultStart.getMinutes());
+					// Default 1-hour duration
+					let endDate = new Date(defaultStart.getTime() + 60 * 60000);
+					endTimeInput.value = padZero(endDate.getHours()) + ":" + padZero(endDate.getMinutes());
+					dateInfo.textContent = formatDate(currentDate);
+				} else
+				{
+					// Default to a reasonable time like 9 AM if no default start is given
+					const defaultHour = 9;
+					startTimeInput.value = `${padZero(defaultHour)}:00`;
+					endTimeInput.value = `${padZero(defaultHour + 1)}:00`;
+					dateInfo.textContent = formatDate(currentDate);
+				}
+			}
+
+			eventModal.classList.add("active");
+		}
+		function closeModal()
+		{
+			console.log("Closing event modal.");
+			eventModal.classList.remove("active");
+		}
+
+		// Delete event
+		function deleteEvent(eventIdToDelete = editingEventId)
+		{
+			console.log("Deleting event:", eventIdToDelete);
+			if (!eventIdToDelete) return;
+
+			const eventToDelete = events.find((e) => e.id === eventIdToDelete);
+			if (eventToDelete && eventToDelete.isGeminiGenerated)
+			{
+				showAlert("Cannot Delete", "Gemini-generated events cannot be directly deleted. They are part of your generated schedule.");
+				return;
+			}
+
+			events = events.filter((e) => e.id !== eventIdToDelete);
+			saveEvents();
+			closeModal(); // Close edit/create modal if open
+			closeEventDetailsModal(); // Close details modal if open
+			updateCalendar();
+			console.log("Event deleted and calendar updated.");
+		}
+
+		// Form submit (add/edit event)
+		eventForm.addEventListener("submit", (e) =>
+		{
+			e.preventDefault();
+			console.log("Event form submitted.");
+			const title = eventTitleInput.value.trim();
+			const description = eventDescriptionInput.value.trim();
+			const category = eventCategoryInput.value;
+			const start = startTimeInput.value;
+			const end = endTimeInput.value;
+
+			if (!title || !start || !end)
+			{
+				showAlert("Input Error", "Please fill all required fields.");
+				return;
+			}
+
+			const [startH, startM] = start.split(":").map(Number);
+			const [endH, endM] = end.split(":").map(Number);
+
+			let startDate = new Date(currentDate);
+			startDate.setHours(startH, startM, 0, 0);
+
+			let endDate = new Date(currentDate);
+			endDate.setHours(endH, endM, 0, 0);
+
+			// If end time is earlier than start time on the same day, assume it spills to next day
+			if (endDate <= startDate && (endH * 60 + endM) < (startH * 60 + startM))
+			{
+				endDate.setDate(endDate.getDate() + 1);
+			}
+
+
+			if (editingEventId)
+			{
+				// Edit existing
+				const ev = events.find((e) => e.id === editingEventId);
+				if (ev)
+				{
+					ev.title = title;
+					ev.description = description;
+					ev.category = category;
+					ev.startTime = startDate;
+					ev.endTime = endDate;
+					ev.allDay = false; // Assume timed event if edited via this form
+					ev.isGeminiGenerated = false; // Mark as user-modified
+					// Don't change color on edit unless explicitly requested
+					console.log("Event updated:", ev.id);
+				}
+			} else
+			{
+				// New event
+				const newId = `user-${Date.now().toString()}`; // Unique ID for user-created events
+				const newEvent = {
+					id: newId,
+					title,
+					description,
+					category,
+					startTime: startDate,
+					endTime: endDate,
+					allDay: false,
+					isGeminiGenerated: false, // Mark as user-created
+					color: getRandomColor(), // Assign a random color to new user events
+				};
+				events.push(newEvent);
+				console.log("New event created:", newEvent.id);
+			}
+			saveEvents();
+			closeModal();
+			updateCalendar();
+		});
+
+		// Chatbot Functions
+		function openChatbotModal()
+		{
+			console.log("Opening chatbot modal.");
+			chatbotModal.classList.add("active");
+			chatInput.focus();
+		}
+
+		function closeChatbotModal()
+		{
+			console.log("Closing chatbot modal.");
+			chatbotModal.classList.remove("active");
+			// Reset chatbot modal position when closed
+			chatbotModalContent.style.left = '';
+			chatbotModalContent.style.top = '';
+		}
+
+		async function sendChatMessage()
+		{
+			const userMessage = chatInput.value.trim();
+			if (!userMessage) return;
+
+			appendMessage(userMessage, 'user');
+			chatInput.value = ''; // Clear input
+
+			// Show a loading indicator
+			const loadingMessage = appendMessage('...', 'bot');
+			console.log("Sending chat message:", userMessage);
+
+			try
+			{
+				// Prepare events to send to the chatbot API
+				const eventsToSend = events.map(ev => ({
+					id: ev.id,
+					title: ev.title,
+					description: ev.description,
+					category: ev.category,
+					startTime: ev.startTime.toISOString(),
+					endTime: ev.endTime.toISOString(),
+					allDay: ev.allDay,
+					isGeminiGenerated: ev.isGeminiGenerated, // Keep this for chatbot context
+					link: ev.link || null, // Include link
+					color: ev.color || null // Include color
+				}));
+
+				const response = await fetch('/api/chatbot', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						userId: currentUserId,
+						userMessage: userMessage,
+						currentCalendarEvents: eventsToSend
+					}),
+				});
+
+				if (!response.ok)
+				{
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+
+				const botResponse = await response.json();
+				console.log("Chatbot raw response:", botResponse);
+
+				// Remove loading indicator
+				loadingMessage.remove();
+
+				if (botResponse.action === "answer")
+				{
+					appendMessage(botResponse.response_message, 'bot');
+				} else if (botResponse.action === "add" && botResponse.event)
+				{
+					// Add event
+					const newEvent = {
+						...botResponse.event,
+						startTime: new Date(botResponse.event.startTime),
+						endTime: new Date(botResponse.event.endTime),
+						isGeminiGenerated: false, // Mark as user-created by chatbot
+						color: botResponse.event.color || getRandomColor(), // Use Gemini's color or assign random
+						link: botResponse.event.link || null // Include link
+					};
+				events.push(newEvent);
+					await saveEvents();
+					updateCalendar();
+					appendMessage(botResponse.response_message || "I've added the event to your calendar.", 'bot');
+					console.log("Chatbot added event:", newEvent.id);
+				} else if (botResponse.action === "update" && botResponse.event && botResponse.event.id)
+				{
+					// Update event
+					const index = events.findIndex(e => e.id === botResponse.event.id);
+					if (index !== -1)
+					{
+						events[index] = {
+							...events[index],
+							...botResponse.event,
+							startTime: new Date(botResponse.event.startTime),
+							endTime: new Date(botResponse.event.endTime),
+							isGeminiGenerated: false, // Mark as user-modified by chatbot
+							color: events[index].color || getRandomColor(), // Keep existing color or assign new
+							link: events[index].link || null // Keep existing link or assign new
+						};
+						await saveEvents();
+						updateCalendar();
+						appendMessage(botResponse.response_message || "I've updated the event.", 'bot');
+						console.log("Chatbot updated event:", botResponse.event.id);
+					} else
+					{
+						appendMessage("I couldn't find that event to update.", 'bot');
+						console.warn("Chatbot tried to update non-existent event:", botResponse.event.id);
+					}
+				} else if (botResponse.action === "delete" && botResponse.id)
+				{
+					// Delete event
+					const initialLength = events.length;
+					events = events.filter(e => e.id !== botResponse.id && !e.isGeminiGenerated); // Only delete user-created/modified events
+					if (events.length < initialLength)
+					{
+						await saveEvents();
+						updateCalendar();
+						appendMessage(botResponse.response_message || "I've deleted the event.", 'bot');
+						console.log("Chatbot deleted event:", botResponse.id);
+					} else
+					{
+						appendMessage("I couldn't find that event to delete or it's a Gemini-generated event.", 'bot');
+						console.warn("Chatbot tried to delete non-existent or Gemini event:", botResponse.id);
+					}
+				} else
+				{
+					appendMessage("I'm not sure how to respond to that. Can you rephrase?", 'bot');
+				}
+
+				chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to bottom
+			} catch (error)
+			{
+				console.error("Chatbot error:", error);
+				loadingMessage.remove(); // Remove loading indicator on error
+				appendMessage(`Sorry, I encountered an error: ${error.message}. Please try again.`, 'bot');
+				chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to bottom
+			}
+		}
+
+		function appendMessage(text, sender)
+		{
+			const messageDiv = document.createElement('div');
+			messageDiv.classList.add('chat-message', sender);
+			messageDiv.textContent = text;
+			chatHistory.appendChild(messageDiv);
+			chatHistory.scrollTop = chatHistory.scrollHeight; // Auto-scroll to latest message
+			return messageDiv; // Return the message element for potential removal (e.g., loading indicator)
+		}
+
+		// Allow sending message with Enter key
+		chatInput.addEventListener('keydown', (e) =>
+		{
+			if (e.key === 'Enter')
+			{
+				e.preventDefault(); // Prevent new line in input
+				sendChatMessage();
+			}
+		});
+
+		// Event Details Modal Functions
+		function openEventDetailsModal(eventId)
+		{
+			console.log("Opening event details modal for ID:", eventId);
+			const ev = events.find((e) => e.id === eventId);
+			if (!ev)
+			{
+				showAlert("Error", "Event details not found.");
+				console.error("Event not found for details modal:", eventId);
+				return;
+			}
+
+			detailTitle.textContent = ev.title;
+			detailDescription.textContent = ev.description || "No description.";
+			detailCategory.textContent = ev.category.charAt(0).toUpperCase() + ev.category.slice(1); // Capitalize
+			detailTime.textContent = `${formatTime(ev.startTime)} - ${formatTime(ev.endTime)}`;
+			detailDate.textContent = formatDate(ev.startTime);
+
+			// Display link if available
+			if (ev.link && ev.link !== "No specific link available." && ev.link !== "null")
+			{
+				detailLinkContainer.style.display = 'block';
+				detailLink.href = ev.link;
+				detailLink.textContent = ev.link;
+			} else
+			{
+				detailLinkContainer.style.display = 'none';
+				detailLink.href = '#';
+				detailLink.textContent = '';
+			}
+
+			// Set up edit/delete buttons for the details modal
+			detailEditBtn.onclick = () =>
+			{
+				closeEventDetailsModal();
+				openModal(eventId);
+			};
+			detailDeleteBtn.onclick = () =>
+			{
+				deleteEvent(eventId); // Pass the eventId to deleteEvent
+			};
+
+			// Disable edit/delete if it's a Gemini-generated event
+			if (ev.isGeminiGenerated)
+			{
+				detailEditBtn.style.display = 'none';
+				detailDeleteBtn.style.display = 'none';
+				console.log("Edit/Delete buttons hidden for Gemini event.");
+			} else
+			{
+				detailEditBtn.style.display = 'inline-block';
+				detailDeleteBtn.style.display = 'inline-block';
+				console.log("Edit/Delete buttons shown for user event.");
+			}
+
+			eventDetailsModal.classList.add("active");
+			console.log("Event details modal opened.");
+		}
+
+		function closeEventDetailsModal()
+		{
+			console.log("Closing event details modal.");
+			eventDetailsModal.classList.remove("active");
+		}
+
+		// Chatbot Modal Dragging
+		chatbotModalHeader.addEventListener('pointerdown', (e) =>
+		{
+			if (e.button !== 0) return; // Only left click
+			isChatbotDragging = true;
+			chatbotModalContent.style.transition = 'none'; // Disable transition during drag
+			chatbotModalContent.style.position = 'fixed'; // Ensure it's fixed for dragging
+			chatbotOffsetX = e.clientX - chatbotModalContent.getBoundingClientRect().left;
+			chatbotOffsetY = e.clientY - chatbotModalContent.getBoundingClientRect().top;
+			console.log("Chatbot modal dragging started.");
+
+			document.addEventListener('pointermove', onChatbotPointerMove);
+			document.addEventListener('pointerup', onChatbotPointerUp);
+		});
+
+		function onChatbotPointerMove(e)
+		{
+			if (!isChatbotDragging) return;
+			let newX = e.clientX - chatbotOffsetX;
+			let newY = e.clientY - chatbotOffsetY;
+
+			// Clamp to viewport boundaries
+			const maxX = window.innerWidth - chatbotModalContent.offsetWidth;
+			const maxY = window.innerHeight - chatbotModalContent.offsetHeight;
+
+			newX = Math.max(0, Math.min(newX, maxX));
+			newY = Math.max(0, Math.min(newY, maxY));
+
+			chatbotModalContent.style.left = `${newX}px`;
+			chatbotModalContent.style.top = `${newY}px`;
+		}
+
+		function onChatbotPointerUp()
+		{
+			isChatbotDragging = false;
+			chatbotModalContent.style.transition = ''; // Re-enable transition
+			document.removeEventListener('pointermove', onChatbotPointerMove);
+			document.removeEventListener('pointerup', onChatbotPointerUp);
+			console.log("Chatbot modal dragging ended.");
+		}
+
+
+		// Initialization
+		// Initial user ID setup (replace with actual login flow)
+		// For demonstration, we use a fixed user ID. In a real app, this would come from a login response.
+		// const storedUserId = localStorage.getItem('currentUserId');
+		// if (storedUserId !== null) {
+		//     currentUserId = parseInt(storedUserId);
+		// } else {
+		//     console.warn("No user ID found in localStorage. Using default 0.");
+		//     currentUserId = 0; // Default to the first user for testing
+		// }
+		console.log("Calendar script initialized. Current User ID:", currentUserId);
+
+		// Set up an interval to update the current time line every minute
+		setInterval(updateCurrentTimeLine, 60 * 1000); // Every minute
+
+		updateCalendar(); // Initial render
+
+		// Accessibility: Close modal with Escape key
+		window.addEventListener("keydown", (e) =>
+		{
+			if (e.key === "Escape" && eventModal.classList.contains("active"))
+			{
+				closeModal();
+			}
+			if (e.key === "Escape" && alertDialog.classList.contains("active"))
+			{
+				closeAlert();
+			}
+			if (e.key === "Escape" && chatbotModal.classList.contains("active"))
+			{
+				closeChatbotModal();
+			}
+			if (e.key === "Escape" && eventDetailsModal.classList.contains("active"))
+			{
+				closeEventDetailsModal();
+			}
+		});
+
+		function getEarliestEventHour(eventsForDay) {
+    if (!eventsForDay.length) return 8; // Default to 8 AM if no events
+    let minHour = Math.min(...eventsForDay.map(ev => ev.startTime.getHours()));
+    return Math.max(0, Math.floor(minHour)); // Clamp to 0
+}
+	</script>
+</body>
+
+</html>

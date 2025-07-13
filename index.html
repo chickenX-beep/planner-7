@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login / Sign Up</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
+    <!-- REPLACE WITH YOUR ACTUAL CLIENT ID -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+            /* Added for better contrast */
+        }
+
+        .container {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            /* Ensures padding is included in width */
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            /* Slightly bolder */
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            /* Subtle separator */
+        }
+
+        .tabs button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-bottom: 2px solid transparent;
+            color: #777;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tabs button.active {
+            border-color: #4a90e2;
+            color: #4a90e2;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            /* Ensures padding is included in width */
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #4a90e2;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+
+        button.action-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #4a90e2;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        button.action-btn:hover:not(:disabled) {
+            background-color: #357abd;
+            transform: translateY(-1px);
+        }
+
+        button.action-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button.action-btn:disabled {
+            background-color: #a0c4f7;
+            cursor: not-allowed;
+        }
+
+        #google-button {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 350px;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .modal-content p {
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .modal-close-btn {
+            background-color: #4a90e2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-close-btn:hover {
+            background-color: #357abd;
+        }
+
+        .error-message {
+            color: #d9534f;
+            font-size: 13px;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            text-align: left;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>🔐 Welcome</h2>
+        <div class="tabs">
+            <button id="loginTab" class="active" onclick="showTab('login')">Login</button>
+            <button id="signupTab" onclick="showTab('signup')">Sign Up</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Enter your Gmail">
+            <div id="loginEmailError" class="error-message"></div>
+            <input type="password" id="loginPassword" placeholder="Enter your password">
+            <div id="loginPasswordError" class="error-message"></div>
+            <button class="action-btn" id="loginBtn" onclick="handleSignIn()">Log In</button>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signupForm" class="hidden">
+            <input type="email" id="signupEmail" placeholder="Enter your Gmail">
+            <div id="signupEmailError" class="error-message"></div>
+            <input type="password" id="signupPassword" placeholder="Create a password">
+            <div id="signupPasswordError" class="error-message"></div>
+            <button class="action-btn" id="signupBtn" onclick="handleSignUp()">Sign Up</button>
+        </div>
+
+        <!-- Google Sign-In -->
+        <div id="google-button">
+            <div id="g_id_onload"
+                data-client_id="203485032130-m9l23bnjtgl6sjua1vl44gcdvlliqvid.apps.googleusercontent.com"
+                data-callback="handleGoogleLogin" data-auto_prompt="false">
+            </div>
+
+            <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline"
+                data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left">
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Messages -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle"></h3>
+            <p id="modalMessage"></p>
+            <button class="modal-close-btn" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const server = "http://localhost:3000";
+        let my_login_info = { email: "", password: "", user: -1 };
+
+        // DOM elements for forms and buttons
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+
+        const loginEmailInput = document.getElementById('loginEmail');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginEmailError = document.getElementById('loginEmailError');
+        const loginPasswordError = document.getElementById('loginPasswordError');
+
+        const signupEmailInput = document.getElementById('signupEmail');
+        const signupPasswordInput = document.getElementById('signupPassword');
+        const signupBtn = document.getElementById('signupBtn');
+        const signupEmailError = document.getElementById('signupEmailError');
+        const signupPasswordError = document.getElementById('signupPasswordError');
+
+        // Modal elements
+        const messageModal = document.getElementById('messageModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        // Function to show custom modal
+        function showModal(title, message)
+        {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            messageModal.style.display = 'flex'; // Use flex to center content
+        }
+
+        // Function to close custom modal
+        function closeModal()
+        {
+            messageModal.style.display = 'none';
+        }
+
+        // Function to toggle between login and signup tabs
+        function showTab(tab)
+        {
+            loginForm.classList.toggle('hidden', tab !== 'login');
+            signupForm.classList.toggle('hidden', tab !== 'signup');
+            loginTab.classList.toggle('active', tab === 'login');
+            signupTab.classList.toggle('active', tab === 'signup');
+            // Clear any previous error messages when switching tabs
+            clearErrors();
+        }
+
+        // Function to clear all error messages
+        function clearErrors()
+        {
+            loginEmailError.style.display = 'none';
+            loginPasswordError.style.display = 'none';
+            signupEmailError.style.display = 'none';
+            signupPasswordError.style.display = 'none';
+        }
+
+        // Basic client-side validation for email
+        function validateEmail(email, errorElement)
+        {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email)
+            {
+                errorElement.textContent = "Email is required.";
+                errorElement.style.display = 'block';
+                return false;
+            } else if (!emailRegex.test(email))
+            {
+                errorElement.textContent = "Please enter a valid email address.";
+                errorElement.style.display = 'block';
+                return false;
+            }
+            errorElement.style.display = 'none';
+            return true;
+        }
+
+        // Basic client-side validation for password
+        function validatePassword(password, errorElement)
+        {
+            if (!password)
+            {
+                errorElement.textContent = "Password is required.";
+                errorElement.style.display = 'block';
+                return false;
+            } else if (password.length < 6)
+            {
+                errorElement.textContent = "Password must be at least 6 characters long.";
+                errorElement.style.display = 'block';
+                return false;
+            }
+            errorElement.style.display = 'none';
+            return true;
+        }
+
+        // Handle sign-in process
+        async function handleSignIn()
+        {
+            const email = loginEmailInput.value.trim();
+            const password = loginPasswordInput.value.trim();
+
+            const isEmailValid = validateEmail(email, loginEmailError);
+            const isPasswordValid = validatePassword(password, loginPasswordError);
+
+            if (!isEmailValid || !isPasswordValid)
+            {
+                return; // Stop if validation fails
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = "Logging In...";
+
+            try
+            {
+                const res = await fetch(server + '/sign_in', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ my_login_info: { email, password } })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.pass_correct)
+                {
+                    my_login_info.user = data.user;
+                    localStorage.setItem("about_me", JSON.stringify(my_login_info));
+                    window.location.href = "form_screen.html"; // Redirect to form screen
+                } else
+                {
+                    showModal("Login Failed", data.message || "Incorrect email or password.");
+                }
+            } catch (error)
+            {
+                console.error("Error during sign-in:", error);
+                showModal("Error", "An unexpected error occurred. Please try again.");
+            } finally
+            {
+                loginBtn.disabled = false;
+                loginBtn.textContent = "Log In";
+            }
+        }
+
+        // Handle sign-up process
+        async function handleSignUp()
+        {
+            const email = signupEmailInput.value.trim();
+            const password = signupPasswordInput.value.trim();
+
+            const isEmailValid = validateEmail(email, signupEmailError);
+            const isPasswordValid = validatePassword(password, signupPasswordError);
+
+            if (!isEmailValid || !isPasswordValid)
+            {
+                return; // Stop if validation fails
+            }
+
+            signupBtn.disabled = true;
+            signupBtn.textContent = "Signing Up...";
+
+            try
+            {
+                const res = await fetch(server + '/sign_up', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success)
+                {
+                    showModal("Success!", data.message || "Signed up successfully! You can now log in.");
+                    showTab('login'); // Switch to login tab after successful signup
+                } else
+                {
+                    showModal("Sign Up Failed", data.message || "Sign up failed. Please try again.");
+                }
+            } catch (error)
+            {
+                console.error("Error during sign-up:", error);
+                showModal("Error", "An unexpected error occurred. Please try again.");
+            } finally
+            {
+                signupBtn.disabled = false;
+                signupBtn.textContent = "Sign Up";
+            }
+        }
+
+        // Handle Google Login (client-side)
+        function handleGoogleLogin(response)
+        {
+            const credential = response.credential;
+            // In a real application, you should send this credential to your server
+            // for verification and user authentication/creation.
+            // The server-side /google_auth endpoint is currently a dummy.
+            fetch(server + '/google_auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential })
+            })
+                .then(res => res.json())
+                .then(data =>
+                {
+                    if (data.success)
+                    {
+                        // Assuming the server returns user info on success
+                        localStorage.setItem("about_me", JSON.stringify(data.user));
+                        window.location.href = "form_screen.html"; // Redirect
+                    } else
+                    {
+                        showModal("Google Login Failed", "Could not log in with Google. Please try again.");
+                    }
+                })
+                .catch(error =>
+                {
+                    console.error("Error during Google login:", error);
+                    showModal("Error", "An unexpected error occurred during Google login.");
+                });
+        }
+
+        // Initialize the tab display on page load
+        document.addEventListener('DOMContentLoaded', () =>
+        {
+            showTab('login');
+        });
+    </script>
+</body>
+
+</html>
